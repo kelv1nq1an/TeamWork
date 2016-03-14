@@ -15,13 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program;  if not, see <http://www.gnu.org/licenses/>.
  */
-package me.fattycat.kun.teamwork;
+package me.fattycat.kun.teamwork.model;
 
-public class AccessToken {
+public class AccessTokenBody {
+    private String client_id;
+    private String client_secret;
+    private String code;
 
-    private String accessToken;
-
-    public String getAccessToken() {
-        return accessToken;
+    public AccessTokenBody(String client_id, String client_secret, String code) {
+        this.client_id = client_id;
+        this.client_secret = client_secret;
+        this.code = code;
     }
 }

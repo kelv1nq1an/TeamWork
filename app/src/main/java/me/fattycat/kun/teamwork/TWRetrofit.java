@@ -25,7 +25,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class TWRetrofit {
@@ -35,22 +34,28 @@ public class TWRetrofit {
             .connectTimeout(15, TimeUnit.SECONDS);
 
     private static Retrofit.Builder retrofitBuilder = new Retrofit.Builder()
-            .baseUrl(TWApi.BASE_URL_COMMON)
-            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
             .addConverterFactory(GsonConverterFactory.create());
+
+    public static <S> S createOAuthService(Class<S> serviceClass, String code) {
+        Retrofit retrofit = retrofitBuilder
+                .baseUrl(TWApi.BASE_URL_COMMON)
+                .client(clientBuilder.build())
+                .build();
+        return retrofit.create(serviceClass);
+    }
 
     public static <S> S createService(Class<S> serviceClass) {
         return createService(serviceClass, null);
     }
 
-    public static <S> S createService(Class<S> serviceClass, final AccessToken accessToken) {
-        if (accessToken != null) {
+    public static <S> S createService(Class<S> serviceClass, final TWAccessToken TWAccessToken) {
+        if (TWAccessToken != null) {
             clientBuilder.addNetworkInterceptor(new Interceptor() {
                 @Override
                 public Response intercept(Chain chain) throws IOException {
                     Request original = chain.request();
                     Request.Builder requestBuilder = original.newBuilder()
-                            .header("access_token", accessToken.getAccessToken())
+                            .header("access_token", TWAccessToken.getAccessToken())
                             .method(original.method(), original.body());
 
                     return chain.proceed(requestBuilder.build());
@@ -59,8 +64,7 @@ public class TWRetrofit {
         }
 
         OkHttpClient client = clientBuilder.build();
-        Retrofit retrofit = retrofitBuilder.client(client).build();
+        Retrofit retrofit = retrofitBuilder.baseUrl(TWApi.BASE_URL_COMMON).client(client).build();
         return retrofit.create(serviceClass);
     }
-
 }

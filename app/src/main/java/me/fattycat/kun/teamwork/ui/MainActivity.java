@@ -12,8 +12,14 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import me.fattycat.kun.teamwork.R;
-import me.fattycat.kun.teamwork.TWSecret;
 import me.fattycat.kun.teamwork.TWApi;
+import me.fattycat.kun.teamwork.TWRetrofit;
+import me.fattycat.kun.teamwork.TWSecret;
+import me.fattycat.kun.teamwork.model.AccessToken;
+import me.fattycat.kun.teamwork.model.AccessTokenBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends BaseActivity {
     private static final String TAG = "MainActivity";
@@ -23,7 +29,7 @@ public class MainActivity extends BaseActivity {
             + "authorize?client_id=" + TWSecret.CLIENT_ID
             + "&redirect_uri=" + TWSecret.REDIRECT_URI;
 
-    @Bind(R.id.accessToken)
+    @Bind(R.id.TWAccessToken)
     TextView accessToken;
 
     @Override
@@ -38,28 +44,42 @@ public class MainActivity extends BaseActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
+        getAccessToken(intent);
+    }
+
+    private void getAccessToken(Intent intent) {
         Uri uri = intent.getData();
         if (uri != null && uri.toString().startsWith(TWSecret.REDIRECT_URI)) {
             String code = uri.getQueryParameter("code");
+
             if (code != null) {
                 accessToken.setText(String.format("Code = %s", code));
-            } else if (uri.getQueryParameter("error") != null) {
-                accessToken.setText("Code Fetch Failure!");
-            }
-        }
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
+                TWApi.AccessTokenService accessTokenService = TWRetrofit.createService(TWApi.AccessTokenService.class);
+                Call<AccessToken> accessTokenCall = accessTokenService.getAccessToken(new AccessTokenBody(TWSecret.CLIENT_ID, TWSecret.CLIENT_SECRET, code));
+                accessTokenCall.enqueue(new Callback<AccessToken>() {
+                    @Override
+                    public void onResponse(Call<AccessToken> call, Response<AccessToken> response) {
+                        if (response.body() != null) {
+                            if (response.body().getAccess_token() != null) {
+                                accessToken.setText(response.body().getAccess_token() + "\n" + response.body().getExpires_in() + "\n" + response.body().getRefresh_token());
+                            } else {
+                                showToast(mContext, "error");
+                            }
+                        } else {
+                            showToast(mContext, "null");
+                        }
 
-        Uri uri = getIntent().getData();
-        if (uri != null && uri.toString().startsWith(TWSecret.REDIRECT_URI)) {
-            String code = uri.getQueryParameter("code");
-            if (code != null) {
-                accessToken.setText(String.format("Code = %s", code));
+                    }
+
+                    @Override
+                    public void onFailure(Call<AccessToken> call, Throwable t) {
+
+                    }
+                });
+
             } else if (uri.getQueryParameter("error") != null) {
-                accessToken.setText("Code Fetch Failure!");
+                showToast(mContext, "授权失败");
             }
         }
     }

@@ -15,22 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program;  if not, see <http://www.gnu.org/licenses/>.
  */
-package me.fattycat.kun.teamwork.ui;
+package me.fattycat.kun.teamwork;
 
-import android.content.Context;
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
-import android.widget.Toast;
+public class TWAccessToken {
 
-public class BaseActivity extends AppCompatActivity {
+    private String accessToken;
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    public void showToast(Context context, String text) {
-        Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+    public String getAccessToken() {
+        return accessToken;
     }
 }

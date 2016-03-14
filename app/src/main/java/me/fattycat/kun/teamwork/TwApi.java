@@ -17,11 +17,20 @@
  */
 package me.fattycat.kun.teamwork;
 
+import me.fattycat.kun.teamwork.model.AccessToken;
+import me.fattycat.kun.teamwork.model.AccessTokenBody;
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.Headers;
+import retrofit2.http.POST;
+
 public class TWApi {
     public static final String BASE_URL_OAUTH = "https://open.worktile.com/oauth2/";
     public static final String BASE_URL_COMMON = "https://api.worktile.com/";
 
-    public interface LoginService {
-
+    public interface AccessTokenService {
+        @Headers("Content-Type:application/json")
+        @POST("oauth2/access_token")
+        Call<AccessToken> getAccessToken(@Body AccessTokenBody accessTokenBody);
     }
 }
