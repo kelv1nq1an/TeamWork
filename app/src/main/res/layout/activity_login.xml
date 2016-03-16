@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:match="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/cyan_500"
+              android:fitsSystemWindows="true"
+              android:gravity="center"
+              android:orientation="vertical"
+              tools:context=".ui.LoginActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+
+        android:gravity="center">
+
+        <com.roger.match.library.MatchTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            match:text="TEAMWORK"
+            match:textColor="@color/white"
+            match:textSize="@dimen/text_size_title"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center">
+
+        <com.roger.match.library.MatchButton
+            android:id="@+id/login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_8"
+            match:text="Login"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dp_4"
+        android:text="@string/text_login_info"
+        android:textColor="@color/cyan_100"/>
+
+</LinearLayout>

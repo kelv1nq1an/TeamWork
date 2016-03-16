@@ -36,14 +36,6 @@ public class TWRetrofit {
     private static Retrofit.Builder retrofitBuilder = new Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create());
 
-    public static <S> S createOAuthService(Class<S> serviceClass, String code) {
-        Retrofit retrofit = retrofitBuilder
-                .baseUrl(TWApi.BASE_URL_COMMON)
-                .client(clientBuilder.build())
-                .build();
-        return retrofit.create(serviceClass);
-    }
-
     public static <S> S createService(Class<S> serviceClass) {
         return createService(serviceClass, null);
     }
@@ -64,7 +56,9 @@ public class TWRetrofit {
         }
 
         OkHttpClient client = clientBuilder.build();
-        Retrofit retrofit = retrofitBuilder.baseUrl(TWApi.BASE_URL_COMMON).client(client).build();
+        Retrofit retrofit = retrofitBuilder.baseUrl(TWApi.BASE_URL_COMMON)
+                .client(client)
+                .build();
         return retrofit.create(serviceClass);
     }
 }

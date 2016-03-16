@@ -28,6 +28,10 @@ public class TWApi {
     public static final String BASE_URL_OAUTH = "https://open.worktile.com/oauth2/";
     public static final String BASE_URL_COMMON = "https://api.worktile.com/";
 
+    public static String OAUTHURL = TWApi.BASE_URL_OAUTH
+            + "authorize?client_id=" + TWSecret.CLIENT_ID
+            + "&redirect_uri=" + TWSecret.REDIRECT_URI;
+
     public interface AccessTokenService {
         @Headers("Content-Type:application/json")
         @POST("oauth2/access_token")

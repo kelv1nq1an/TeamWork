@@ -18,10 +18,33 @@
 package me.fattycat.kun.teamwork;
 
 public class TWAccessToken {
+    public static boolean AUTHORIZED = true;
+    public static boolean NOTAUTHORIZED = false;
 
-    private String accessToken;
+    public static boolean sIsAuthorized;
+    private static String sAccessToken;
+    private static String sRefreshToken;
+
+    private TWAccessToken() {
+    }
+
+    public static void init(boolean isAuthorized) {
+        sIsAuthorized = isAuthorized;
+        sAccessToken = null;
+        sRefreshToken = null;
+    }
+
+    public static void init(boolean isAuthorized, String accessToken, String refreshToken) {
+        sIsAuthorized = isAuthorized;
+        sAccessToken = accessToken;
+        sRefreshToken = refreshToken;
+    }
 
     public String getAccessToken() {
-        return accessToken;
+        return sAccessToken;
+    }
+
+    public String getRefreshToken() {
+        return sRefreshToken;
     }
 }

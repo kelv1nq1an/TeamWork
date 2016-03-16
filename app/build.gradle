@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "me.fattycat.kun.teamwork"
-        minSdkVersion 18
+        minSdkVersion 19
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -32,4 +32,5 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.0.1'
     compile 'com.squareup.okhttp3:logging-interceptor:3.0.1'
     compile 'com.jakewharton:butterknife:7.0.1'
+    compile 'com.roger.match.library:library:1.0.1'
 }

@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">TeamWork</string>
+    <string name="text_sp_authorize">tw_authorization</string>
+    <string name="text_sp_authorize_flag">tw_authorize_flag</string>
+    <string name="text_sp_authorize_access_token">tw_authorize_access_token</string>
+    <string name="text_sp_authorize_refresh_token">tw_authorize_refresh_token</string>
+    <string name="text_login_info">Design by fattycat</string>
 </resources>

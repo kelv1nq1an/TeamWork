@@ -17,20 +17,8 @@
  */
 package me.fattycat.kun.teamwork;
 
-import android.app.Application;
-import android.content.Context;
-
-import me.fattycat.kun.teamwork.util.ToastUtils;
-
-public class App extends Application {
-    public static Context sContext;
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        sContext = this;
-        ToastUtils.register(sContext);
-    }
-
+public class TWSecret {
+    public static final String REDIRECT_URI = "http://shenjingstudio.com/worktile/response.php";
+    public static final String CLIENT_ID = "194184ec1ed94a6b86123c47f03eb8bf";
+    public static final String CLIENT_SECRET = "9bda94c013fd48399bf83abad58104b6";
 }
