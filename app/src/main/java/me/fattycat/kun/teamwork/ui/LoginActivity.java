@@ -10,12 +10,17 @@ import android.view.View;
 
 import com.roger.match.library.MatchButton;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import me.fattycat.kun.teamwork.R;
 import me.fattycat.kun.teamwork.TWAccessToken;
 import me.fattycat.kun.teamwork.TWApi;
+import me.fattycat.kun.teamwork.event.AuthorizeEvent;
+import me.fattycat.kun.teamwork.util.ToastUtils;
 
 public class LoginActivity extends BaseActivity {
     private static final String TAG = "LoginActivity";
@@ -36,10 +41,27 @@ public class LoginActivity extends BaseActivity {
 
         if (TWAccessToken.sIsAuthorized) {
             mBtnLogin.setVisibility(View.GONE);
+            ToastUtils.showShort("authorized");
+
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
         } else {
             mBtnLogin.setVisibility(View.VISIBLE);
         }
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -61,5 +83,15 @@ public class LoginActivity extends BaseActivity {
         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
         builder.setToolbarColor(ContextCompat.getColor(mContext, R.color.colorPrimary));
         builder.build().launchUrl(this, Uri.parse(TWApi.OAUTHURL));
+    }
+
+    @Subscribe
+    public void onAuthorizeSuccess(AuthorizeEvent event) {
+        if (event.isAuthorized) {
+            checkAuthorization();
+        } else {
+            // FIXME: 16/3/16 test
+            ToastUtils.showShort("授权失败");
+        }
     }
 }

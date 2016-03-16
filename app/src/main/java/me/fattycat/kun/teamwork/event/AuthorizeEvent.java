@@ -15,10 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program;  if not, see <http://www.gnu.org/licenses/>.
  */
-package me.fattycat.kun.teamwork;
+package me.fattycat.kun.teamwork.event;
 
-public class TWSecret {
-    public static final String REDIRECT_URI = "http://shenjingstudio.com/worktile/response.php";
-    public static final String CLIENT_ID = "194184ec1ed94a6b86123c47f03eb8bf";
-    public static final String CLIENT_SECRET = "9bda94c013fd48399bf83abad58104b6";
+public class AuthorizeEvent {
+    public boolean isAuthorized;
+
+    public AuthorizeEvent(boolean isAuthorized) {
+        this.isAuthorized = isAuthorized;
+    }
+
 }
