@@ -17,7 +17,7 @@
  */
 package me.fattycat.kun.teamwork.model;
 
-public class AccessToken {
+public class AccessTokenModel {
 
     /**
      * access_token : ACCESS_TOKEN

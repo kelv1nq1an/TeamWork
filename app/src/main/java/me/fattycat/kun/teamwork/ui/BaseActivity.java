@@ -33,25 +33,26 @@ import me.fattycat.kun.teamwork.TWApi;
 import me.fattycat.kun.teamwork.TWRetrofit;
 import me.fattycat.kun.teamwork.TWSecret;
 import me.fattycat.kun.teamwork.event.AuthorizeEvent;
-import me.fattycat.kun.teamwork.model.AccessToken;
 import me.fattycat.kun.teamwork.model.AccessTokenBody;
+import me.fattycat.kun.teamwork.model.AccessTokenModel;
+import me.fattycat.kun.teamwork.util.LogUtils;
 import me.fattycat.kun.teamwork.util.ToastUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class BaseActivity extends AppCompatActivity {
+    private static final String TAG = "TW_BaseActivity";
 
     private SharedPreferences mSPAuthorize;
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mSPAuthorize = getSharedPreferences(getString(R.string.text_sp_authorize), MODE_PRIVATE);
+        mSPAuthorize = getSharedPreferences(getString(R.string.text_sp_authorize_key), MODE_PRIVATE);
     }
 
-    public void checkAuthorization() {
+    public void loadAuthorization() {
         boolean isAuthorized = mSPAuthorize.getBoolean(getString(R.string.text_sp_authorize_flag), false);
 
         if (isAuthorized) {
@@ -60,9 +61,18 @@ public class BaseActivity extends AppCompatActivity {
 
             if (!TextUtils.isEmpty(accessToken) && !TextUtils.isEmpty(refreshToken)) {
                 TWAccessToken.init(TWAccessToken.AUTHORIZED, accessToken, refreshToken);
+
+                LogUtils.i(TAG, "loadAuthorization | authorized");
+            } else {
+                TWAccessToken.init(TWAccessToken.NOTAUTHORIZED);
+
+                LogUtils.i(TAG, "loadAuthorization | not authorized");
             }
+
         } else {
             TWAccessToken.init(TWAccessToken.NOTAUTHORIZED);
+
+            LogUtils.i(TAG, "loadAuthorization | not authorized");
         }
     }
 
@@ -71,45 +81,47 @@ public class BaseActivity extends AppCompatActivity {
         if (uri != null && uri.toString().startsWith(TWSecret.REDIRECT_URI)) {
             String code = uri.getQueryParameter("code");
 
-            if (code != null) {
-                // FIXME: 16/3/16 test
-                //accessToken.setText(String.format("Code = %s", code));
-                ToastUtils.showShort(code);
+            LogUtils.i(TAG, "getAccessToken | code = " + code);
 
+            if (code != null) {
                 TWApi.AccessTokenService accessTokenService = TWRetrofit.createService(TWApi.AccessTokenService.class);
-                Call<AccessToken> accessTokenCall = accessTokenService.getAccessToken(new AccessTokenBody(TWSecret.CLIENT_ID, TWSecret.CLIENT_SECRET, code));
-                accessTokenCall.enqueue(new Callback<AccessToken>() {
+                Call<AccessTokenModel> accessTokenCall = accessTokenService.getAccessToken(new AccessTokenBody(TWSecret.CLIENT_ID, TWSecret.CLIENT_SECRET, code));
+
+                accessTokenCall.enqueue(new Callback<AccessTokenModel>() {
                     @Override
-                    public void onResponse(Call<AccessToken> call, Response<AccessToken> response) {
+                    public void onResponse(Call<AccessTokenModel> call, Response<AccessTokenModel> response) {
                         if (response.body() != null) {
                             if (response.body().getAccess_token() != null) {
                                 String accessToken = response.body().getAccess_token();
                                 String refreshToken = response.body().getRefresh_token();
 
                                 SharedPreferences.Editor editor = mSPAuthorize.edit();
-                                editor.putBoolean(getString(R.string.text_sp_authorize_flag), TWAccessToken.AUTHORIZED);
-                                editor.putString(getString(R.string.text_sp_authorize_access_token), accessToken);
-                                editor.putString(getString(R.string.text_sp_authorize_refresh_token), refreshToken);
-                                editor.apply();
+                                editor.putBoolean(getString(R.string.text_sp_authorize_flag), TWAccessToken.AUTHORIZED)
+                                        .putString(getString(R.string.text_sp_authorize_access_token), accessToken)
+                                        .putString(getString(R.string.text_sp_authorize_refresh_token), refreshToken)
+                                        .apply();
 
                                 EventBus.getDefault().post(new AuthorizeEvent(true));
 
-                                // FIXME: 16/3/16 test toast
-                                ToastUtils.showShort(accessToken);
+                                LogUtils.i(TAG, "getAccessToken | onResponse | access_token = " + accessToken);
 
-                                //accessToken.setText(response.body().getAccess_token() + "\n" + response.body().getExpires_in() + "\n" + response.body().getRefresh_token());
                             } else {
+                                // FIXME: 16/3/17
                                 ToastUtils.showShort("error");
                             }
                         } else {
+                            // FIXME: 16/3/17
                             ToastUtils.showShort("null");
                         }
 
                     }
 
                     @Override
-                    public void onFailure(Call<AccessToken> call, Throwable t) {
+                    public void onFailure(Call<AccessTokenModel> call, Throwable t) {
                         EventBus.getDefault().post(new AuthorizeEvent(false));
+
+                        LogUtils.i(TAG, "getAccessToken | onFailure");
+
                     }
                 });
 
@@ -119,6 +131,5 @@ public class BaseActivity extends AppCompatActivity {
             }
         }
     }
-
 
 }

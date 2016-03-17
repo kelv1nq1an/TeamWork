@@ -24,12 +24,14 @@ import me.fattycat.kun.teamwork.util.ToastUtils;
 
 public class App extends Application {
     public static Context sContext;
+    public static boolean sDebug;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
         sContext = this;
+        sDebug = true;
         ToastUtils.register(sContext);
     }
 

@@ -20,10 +20,12 @@ import me.fattycat.kun.teamwork.R;
 import me.fattycat.kun.teamwork.TWAccessToken;
 import me.fattycat.kun.teamwork.TWApi;
 import me.fattycat.kun.teamwork.event.AuthorizeEvent;
+import me.fattycat.kun.teamwork.util.LogUtils;
 import me.fattycat.kun.teamwork.util.ToastUtils;
 
 public class LoginActivity extends BaseActivity {
-    private static final String TAG = "LoginActivity";
+    private static final String TAG = "TW_LoginActivity";
+
     @Bind(R.id.login)
     MatchButton mBtnLogin;
 
@@ -37,18 +39,8 @@ public class LoginActivity extends BaseActivity {
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
 
+        loadAuthorization();
         checkAuthorization();
-
-        if (TWAccessToken.sIsAuthorized) {
-            mBtnLogin.setVisibility(View.GONE);
-            ToastUtils.showShort("authorized");
-
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            startActivity(intent);
-            finish();
-        } else {
-            mBtnLogin.setVisibility(View.VISIBLE);
-        }
 
     }
 
@@ -64,9 +56,27 @@ public class LoginActivity extends BaseActivity {
         EventBus.getDefault().unregister(this);
     }
 
+    private void checkAuthorization() {
+        if (TWAccessToken.sIsAuthorized) {
+            mBtnLogin.setVisibility(View.GONE);
+
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+
+            LogUtils.i(TAG, "checkAuthorization | authorized");
+        } else {
+            mBtnLogin.setVisibility(View.VISIBLE);
+
+            LogUtils.i(TAG, "checkAuthorization | not authorized");
+        }
+    }
+
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+
+        LogUtils.i(TAG, "onNewIntent | not authorized");
 
         getAccessToken(intent);
     }
@@ -86,8 +96,12 @@ public class LoginActivity extends BaseActivity {
     }
 
     @Subscribe
-    public void onAuthorizeSuccess(AuthorizeEvent event) {
+    public void onAuthorize(AuthorizeEvent event) {
+
+        LogUtils.i(TAG, "onAuthorize");
+
         if (event.isAuthorized) {
+            loadAuthorization();
             checkAuthorization();
         } else {
             // FIXME: 16/3/16 test

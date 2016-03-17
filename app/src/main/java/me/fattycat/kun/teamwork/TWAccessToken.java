@@ -40,11 +40,11 @@ public class TWAccessToken {
         sRefreshToken = refreshToken;
     }
 
-    public String getAccessToken() {
+    public static String getAccessToken() {
         return sAccessToken;
     }
 
-    public String getRefreshToken() {
+    public static String getRefreshToken() {
         return sRefreshToken;
     }
 }

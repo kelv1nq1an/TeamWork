@@ -40,14 +40,15 @@ public class TWRetrofit {
         return createService(serviceClass, null);
     }
 
-    public static <S> S createService(Class<S> serviceClass, final TWAccessToken TWAccessToken) {
-        if (TWAccessToken != null) {
+    public static <S> S createService(Class<S> serviceClass, final String accessToken) {
+        if (accessToken != null) {
             clientBuilder.addNetworkInterceptor(new Interceptor() {
                 @Override
                 public Response intercept(Chain chain) throws IOException {
                     Request original = chain.request();
                     Request.Builder requestBuilder = original.newBuilder()
-                            .header("access_token", TWAccessToken.getAccessToken())
+                            .addHeader("Content-Type", "application/json")
+                            .addHeader("access_token", accessToken)
                             .method(original.method(), original.body());
 
                     return chain.proceed(requestBuilder.build());

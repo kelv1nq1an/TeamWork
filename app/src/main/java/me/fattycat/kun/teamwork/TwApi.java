@@ -17,11 +17,12 @@
  */
 package me.fattycat.kun.teamwork;
 
-import me.fattycat.kun.teamwork.model.AccessToken;
 import me.fattycat.kun.teamwork.model.AccessTokenBody;
+import me.fattycat.kun.teamwork.model.AccessTokenModel;
+import me.fattycat.kun.teamwork.model.UserProfileModel;
 import retrofit2.Call;
 import retrofit2.http.Body;
-import retrofit2.http.Headers;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
 
 public class TWApi {
@@ -33,8 +34,12 @@ public class TWApi {
             + "&redirect_uri=" + TWSecret.REDIRECT_URI;
 
     public interface AccessTokenService {
-        @Headers("Content-Type:application/json")
         @POST("oauth2/access_token")
-        Call<AccessToken> getAccessToken(@Body AccessTokenBody accessTokenBody);
+        Call<AccessTokenModel> getAccessToken(@Body AccessTokenBody accessTokenBody);
+    }
+
+    public interface UserProfileService {
+        @GET("v1/user/profile")
+        Call<UserProfileModel> getUserProfile();
     }
 }

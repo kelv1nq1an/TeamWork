@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">TeamWork</string>
-    <string name="text_sp_authorize">tw_authorization</string>
+    <string name="text_sp_authorize_key">tw_authorization</string>
     <string name="text_sp_authorize_flag">tw_authorize_flag</string>
     <string name="text_sp_authorize_access_token">tw_authorize_access_token</string>
     <string name="text_sp_authorize_refresh_token">tw_authorize_refresh_token</string>
@@ -11,4 +11,14 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+    <string name="text_profile_name">用户名</string>
+    <string name="text_profile_description">个人简介</string>
+    <string name="text_sp_user_profile_key">tw_user_profile</string>
+    <string name="text_sp_user_profile_uid">tw_profile_uid</string>
+    <string name="text_sp_user_profile_avatar">tw_profile_avatar</string>
+    <string name="text_sp_user_profile_name">tw_profile_name</string>
+    <string name="text_sp_user_profile_display_name">tw_profile_display_name</string>
+    <string name="text_sp_user_profile_desc">tw_profile_desc</string>
+    <string name="text_sp_user_profile_email">tw_profile_email</string>
+    <string name="text_sp_user_profile_online">tw_profile_online</string>
 </resources>
