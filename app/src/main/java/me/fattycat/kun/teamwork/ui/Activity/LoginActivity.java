@@ -1,4 +1,4 @@
-package me.fattycat.kun.teamwork.ui;
+package me.fattycat.kun.teamwork.ui.activity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -60,7 +60,7 @@ public class LoginActivity extends BaseActivity {
         if (TWAccessToken.sIsAuthorized) {
             mBtnLogin.setVisibility(View.GONE);
 
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
             startActivity(intent);
             finish();
 

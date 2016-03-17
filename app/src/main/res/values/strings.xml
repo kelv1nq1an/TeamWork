@@ -21,4 +21,6 @@
     <string name="text_sp_user_profile_desc">tw_profile_desc</string>
     <string name="text_sp_user_profile_email">tw_profile_email</string>
     <string name="text_sp_user_profile_online">tw_profile_online</string>
+    <string name="title_activity_home">TeamWork</string>
+    <string name="section_format">Hello World from section: %1$d</string>
 </resources>
