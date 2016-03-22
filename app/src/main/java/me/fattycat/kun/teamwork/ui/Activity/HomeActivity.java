@@ -18,8 +18,6 @@
 package me.fattycat.kun.teamwork.ui.activity;
 
 import android.os.Bundle;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -32,6 +30,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import me.fattycat.kun.teamwork.R;
@@ -43,16 +44,10 @@ public class HomeActivity extends BaseActivity {
     Toolbar mToolbar;
     @Bind(R.id.tabs)
     TabLayout mTabLayout;
-    @Bind(R.id.appbar)
-    AppBarLayout mAppbar;
     @Bind(R.id.container)
     ViewPager mViewPager;
     @Bind(R.id.fab)
     FloatingActionButton mFab;
-    @Bind(R.id.main_content)
-    CoordinatorLayout mMainContent;
-
-    private SectionsPagerAdapter mSectionsPagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,10 +56,13 @@ public class HomeActivity extends BaseActivity {
         ButterKnife.bind(this);
 
         setSupportActionBar(mToolbar);
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-        mTabLayout.setupWithViewPager(mViewPager);
 
+        initTabs();
+        initFab();
+
+    }
+
+    private void initFab() {
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -72,9 +70,17 @@ public class HomeActivity extends BaseActivity {
                         .setAction("Action", null).show();
             }
         });
-
     }
 
+    private void initTabs() {
+        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        sectionsPagerAdapter.addFragments(new UserFragment(), "我");
+        sectionsPagerAdapter.addFragments(new UserFragment(), "我");
+        sectionsPagerAdapter.addFragments(new UserFragment(), "我");
+        sectionsPagerAdapter.addFragments(new UserFragment(), "我");
+        mViewPager.setAdapter(sectionsPagerAdapter);
+        mTabLayout.setupWithViewPager(mViewPager);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -94,34 +100,31 @@ public class HomeActivity extends BaseActivity {
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
+        private final List<Fragment> mFragments = new ArrayList<>();
+        private final List<String> mTitles = new ArrayList<>();
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
+        public void addFragments(Fragment fragment, String title) {
+            mFragments.add(fragment);
+            mTitles.add(title);
+        }
+
         @Override
         public Fragment getItem(int position) {
-            return new UserFragment();
+            return mFragments.get(position);
         }
 
         @Override
         public int getCount() {
-            return 4;
+            return mFragments.size();
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return "SECTION 1";
-                case 1:
-                    return "SECTION 2";
-                case 2:
-                    return "我";
-                case 3:
-                    return "我";
-            }
-            return null;
+            return mTitles.get(position);
         }
     }
 }

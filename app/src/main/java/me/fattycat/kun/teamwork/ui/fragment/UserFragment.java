@@ -22,6 +22,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +32,6 @@ import com.squareup.picasso.Picasso;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import me.fattycat.kun.teamwork.R;
 import me.fattycat.kun.teamwork.TWAccessToken;
@@ -39,7 +39,6 @@ import me.fattycat.kun.teamwork.TWApi;
 import me.fattycat.kun.teamwork.TWRetrofit;
 import me.fattycat.kun.teamwork.model.UserProfileModel;
 import me.fattycat.kun.teamwork.util.LogUtils;
-import me.fattycat.kun.teamwork.util.ToastUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -47,17 +46,18 @@ import retrofit2.Response;
 public class UserFragment extends BaseFragment {
     private static final String TAG = "TW_UserFragment";
 
-    @Bind(R.id.profile_image)
+    @Bind(R.id.fragment_user_refresh_container)
+    SwipeRefreshLayout mRefreshContainer;
+    @Bind(R.id.fragment_user_profile_image)
     CircleImageView mProfileAvatar;
-    @Bind(R.id.profile_name)
+    @Bind(R.id.fragment_user_profile_name)
     TextView mProfileName;
-    @Bind(R.id.profile_description)
+    @Bind(R.id.fragment_user_profile_description)
     TextView mProfileDesc;
+    @Bind(R.id.fragment_user_profile_email)
+    TextView mProfileEmail;
 
     private SharedPreferences mSPUserProfile;
-
-    public UserFragment() {
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,6 +72,7 @@ public class UserFragment extends BaseFragment {
         View rootView = inflater.inflate(R.layout.fragment_user, container, false);
         ButterKnife.bind(this, rootView);
 
+        initSwipeRefresh();
         return rootView;
     }
 
@@ -83,11 +84,36 @@ public class UserFragment extends BaseFragment {
         getUserProfile();
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
+    }
+
+    public UserFragment() {
+    }
+
+    private void initSwipeRefresh() {
+        mRefreshContainer.setColorSchemeResources(R.color.colorPrimary, R.color.colorAccent, R.color.yellow_500);
+
+        mRefreshContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getUserProfile();
+            }
+        });
+    }
+
     private void loadUserProfile() {
         // FIXME: 16/3/17 add default avatar
         Picasso.with(mContext).load(Uri.parse(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_avatar), null))).into(mProfileAvatar);
         mProfileName.setText(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_display_name), getString(R.string.text_profile_name)));
         mProfileDesc.setText(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_desc), getString(R.string.text_profile_description)));
+        mProfileEmail.setText(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_email), getString(R.string.text_profile_email_default)));
+
+        if (mRefreshContainer.isRefreshing()) {
+            mRefreshContainer.setRefreshing(false);
+        }
 
         LogUtils.i(TAG, "loadUserProfile");
     }
@@ -122,6 +148,7 @@ public class UserFragment extends BaseFragment {
 
                     loadUserProfile();
 
+
                     LogUtils.i(TAG, "getUserProfile | onResponse | name = " + name);
 
                 } else {
@@ -136,10 +163,4 @@ public class UserFragment extends BaseFragment {
         });
     }
 
-    @OnClick(R.id.profile_image)
-    public void refreshUserProfile() {
-        getUserProfile();
-
-        ToastUtils.showShort("refresh");
-    }
 }

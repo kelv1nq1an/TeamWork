@@ -1,51 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<android.support.v4.widget.SwipeRefreshLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/fragment_user_refresh_container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/nav_header_height"
-        android:background="@drawable/ic_user_profile_header"
-        android:gravity="bottom|center_horizontal"
-        android:orientation="vertical"
-        android:paddingBottom="@dimen/dp_16"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark">
-
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/profile_image"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="@dimen/dp_16"
-            android:src="@drawable/avater_test"
-            app:civ_border_color="@color/white"
-            app:civ_border_width="2dp"/>
-
-        <TextView
-            android:id="@+id/profile_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/text_profile_name"
-            android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
-
-        <TextView
-            android:id="@+id/profile_description"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp_4"
-            android:text="@string/text_profile_description"
-            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            android:textColor="@color/grey_100"/>
-
-    </LinearLayout>
+    android:layout_height="match_parent">
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/nav_header_height"
+                android:background="@drawable/ic_user_profile_header"
+                android:gravity="bottom|center_horizontal"
+                android:orientation="vertical"
+                android:paddingBottom="@dimen/dp_16"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark"
+                tools:background="#000000">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/fragment_user_profile_image"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="@dimen/dp_16"
+                    android:src="@drawable/avater_test"
+                    app:civ_border_color="@color/white"
+                    app:civ_border_width="2dp"/>
+
+                <TextView
+                    android:id="@+id/fragment_user_profile_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/text_profile_name"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
+
+                <TextView
+                    android:id="@+id/fragment_user_profile_description"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_4"
+                    android:text="@string/text_profile_description"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                    android:textColor="@color/grey_100"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/dp_16">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/text_profile_email"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                    android:textColor="@color/cyan_500"/>
+
+                <include layout="@layout/layout_divider"/>
+
+                <TextView
+                    android:id="@+id/fragment_user_profile_email"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/text_profile_email_default"
+                    android:textSize="@dimen/text_size_body"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="1000dp"/>
+            </LinearLayout>
+
+        </LinearLayout>
     </ScrollView>
-</LinearLayout>
+</android.support.v4.widget.SwipeRefreshLayout>
