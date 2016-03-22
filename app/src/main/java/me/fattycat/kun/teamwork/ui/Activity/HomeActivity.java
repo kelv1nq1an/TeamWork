@@ -36,6 +36,7 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import me.fattycat.kun.teamwork.R;
+import me.fattycat.kun.teamwork.ui.fragment.TeamFragment;
 import me.fattycat.kun.teamwork.ui.fragment.UserFragment;
 
 public class HomeActivity extends BaseActivity {
@@ -55,6 +56,7 @@ public class HomeActivity extends BaseActivity {
         setContentView(R.layout.activity_home);
         ButterKnife.bind(this);
 
+        mToolbar.setTitle(getString(R.string.app_name));
         setSupportActionBar(mToolbar);
 
         initTabs();
@@ -74,7 +76,7 @@ public class HomeActivity extends BaseActivity {
 
     private void initTabs() {
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        sectionsPagerAdapter.addFragments(new UserFragment(), "我");
+        sectionsPagerAdapter.addFragments(new TeamFragment(), "团队");
         sectionsPagerAdapter.addFragments(new UserFragment(), "我");
         sectionsPagerAdapter.addFragments(new UserFragment(), "我");
         sectionsPagerAdapter.addFragments(new UserFragment(), "我");

@@ -17,9 +17,13 @@
  */
 package me.fattycat.kun.teamwork;
 
+import java.util.List;
+
 import me.fattycat.kun.teamwork.model.AccessTokenBody;
 import me.fattycat.kun.teamwork.model.AccessTokenModel;
+import me.fattycat.kun.teamwork.model.ProjectModel;
 import me.fattycat.kun.teamwork.model.UserProfileModel;
+import me.fattycat.kun.teamwork.model.UserTeamListModel;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -28,6 +32,7 @@ import retrofit2.http.POST;
 public class TWApi {
     public static final String BASE_URL_OAUTH = "https://open.worktile.com/oauth2/";
     public static final String BASE_URL_COMMON = "https://api.worktile.com/";
+    public static final String BASE_URL_SCHEME = "v1/";
 
     public static String OAUTHURL = TWApi.BASE_URL_OAUTH
             + "authorize?client_id=" + TWSecret.CLIENT_ID
@@ -39,7 +44,17 @@ public class TWApi {
     }
 
     public interface UserProfileService {
-        @GET("v1/user/profile")
+        @GET(BASE_URL_SCHEME + "user/profile")
         Call<UserProfileModel> getUserProfile();
+    }
+
+    public interface UserTeamListService {
+        @GET(BASE_URL_SCHEME + "teams")
+        Call<List<UserTeamListModel>> getUserTeams();
+    }
+
+    public interface AllProjectsService {
+        @GET(BASE_URL_SCHEME + "projects")
+        Call<List<ProjectModel>> getAllProjects();
     }
 }

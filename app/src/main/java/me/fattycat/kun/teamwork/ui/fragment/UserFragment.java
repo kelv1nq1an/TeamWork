@@ -106,13 +106,15 @@ public class UserFragment extends BaseFragment {
 
     private void loadUserProfile() {
         // FIXME: 16/3/17 add default avatar
-        Picasso.with(mContext).load(Uri.parse(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_avatar), null))).into(mProfileAvatar);
-        mProfileName.setText(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_display_name), getString(R.string.text_profile_name)));
-        mProfileDesc.setText(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_desc), getString(R.string.text_profile_description)));
-        mProfileEmail.setText(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_email), getString(R.string.text_profile_email_default)));
+        if (mSPUserProfile.getString(getString(R.string.text_sp_user_profile_uid), null) != null) {
+            Picasso.with(mContext).load(Uri.parse(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_avatar), null))).into(mProfileAvatar);
+            mProfileName.setText(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_display_name), getString(R.string.text_profile_name)));
+            mProfileDesc.setText(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_desc), getString(R.string.text_profile_description)));
+            mProfileEmail.setText(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_email), getString(R.string.text_profile_email_default)));
 
-        if (mRefreshContainer.isRefreshing()) {
-            mRefreshContainer.setRefreshing(false);
+            if (mRefreshContainer.isRefreshing()) {
+                mRefreshContainer.setRefreshing(false);
+            }
         }
 
         LogUtils.i(TAG, "loadUserProfile");
