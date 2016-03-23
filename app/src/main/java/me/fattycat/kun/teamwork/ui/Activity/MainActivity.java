@@ -49,6 +49,7 @@ import me.fattycat.kun.teamwork.R;
 import me.fattycat.kun.teamwork.TWAccessToken;
 import me.fattycat.kun.teamwork.TWApi;
 import me.fattycat.kun.teamwork.TWRetrofit;
+import me.fattycat.kun.teamwork.TWSettings;
 import me.fattycat.kun.teamwork.model.ProjectModel;
 import me.fattycat.kun.teamwork.model.TeamProjectModel;
 import me.fattycat.kun.teamwork.model.UserProfileModel;
@@ -128,6 +129,7 @@ public class MainActivity extends BaseActivity
         spinnerProfileTeam.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                TWSettings.sSelectedTeamPos = position;
                 getTeamProjects(mUserTeamList.get(position).getTeam_id());
             }
 
@@ -231,11 +233,16 @@ public class MainActivity extends BaseActivity
         }
         mUserTeamAdapter.notifyDataSetChanged();
 
+        TWSettings.sTeamList = mUserTeamList;
+        TWSettings.sSelectedTeamPos = 0;
+
         LogUtils.i(TAG, "updateSpinnerData");
 
     }
 
     private void getTeamProjects(String teamId) {
+        initTeamProjectMenu(true);
+
         TWApi.TeamProjectListService teamProjectListService = TWRetrofit.createService(TWApi.TeamProjectListService.class, TWAccessToken.getAccessToken());
         Call<List<TeamProjectModel>> teamProjectsCall = teamProjectListService.getTeamProjectList(teamId);
         teamProjectsCall.enqueue(new Callback<List<TeamProjectModel>>() {
@@ -244,7 +251,7 @@ public class MainActivity extends BaseActivity
                 if (response.body() != null) {
                     mTeamProjectList = response.body();
 
-                    initTeamProjectMenu();
+                    initTeamProjectMenu(false);
 
                     LogUtils.i(TAG, "getTeamProjects | onResponse");
 
@@ -279,20 +286,39 @@ public class MainActivity extends BaseActivity
         });
     }
 
-    private void initTeamProjectMenu() {
+    private void initTeamProjectMenu(boolean isClear) {
+        LogUtils.i(TAG, "initTeamProjectMenu");
+
         Menu menu = mNavView.getMenu();
         menu.removeGroup(233);
-        SubMenu projectMenu = menu.addSubMenu(233, Menu.NONE, Menu.NONE, getString(R.string.text_menu_project));
+        SubMenu projectMenu = menu.addSubMenu(233,
+                Menu.NONE,
+                Menu.NONE,
+                String.format("%s %s", getString(R.string.text_menu_project), TWSettings.sTeamList.get(TWSettings.sSelectedTeamPos).getName()));
+
+        if (isClear) {
+            projectMenu.add(Menu.NONE, Menu.NONE, Menu.NONE, "项目加载中 ...")
+                    .setCheckable(true)
+                    .setIcon(android.R.color.transparent);
+            return;
+        }
+
         int index = 0;
         for (TeamProjectModel model : mTeamProjectList) {
-            projectMenu.add(Menu.NONE, index++, Menu.NONE, model.getName()).setCheckable(true).setIcon(android.R.color.transparent);
+            projectMenu.add(Menu.NONE, index++, Menu.NONE, model.getName())
+                    .setCheckable(true)
+                    .setIcon(android.R.color.transparent);
         }
 
         if (index == 0) {
-            projectMenu.add(Menu.NONE, index + 1, Menu.NONE, "该团队暂时没有项目").setCheckable(true).setIcon(android.R.color.transparent);
+            projectMenu.add(Menu.NONE,
+                    Menu.NONE,
+                    Menu.NONE,
+                    "该团队暂时没有项目")
+                    .setCheckable(true)
+                    .setIcon(android.R.color.transparent);
         }
 
-        LogUtils.i(TAG, "initTeamProjectMenu");
 
     }
 
