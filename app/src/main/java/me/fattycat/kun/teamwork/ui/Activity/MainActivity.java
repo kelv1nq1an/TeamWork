@@ -32,6 +32,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -47,7 +50,9 @@ import me.fattycat.kun.teamwork.TWAccessToken;
 import me.fattycat.kun.teamwork.TWApi;
 import me.fattycat.kun.teamwork.TWRetrofit;
 import me.fattycat.kun.teamwork.model.ProjectModel;
+import me.fattycat.kun.teamwork.model.TeamProjectModel;
 import me.fattycat.kun.teamwork.model.UserProfileModel;
+import me.fattycat.kun.teamwork.model.UserTeamListModel;
 import me.fattycat.kun.teamwork.util.LogUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -67,12 +72,15 @@ public class MainActivity extends BaseActivity
     DrawerLayout mDrawerLayout;
 
     private CircleImageView mProfileImage;
-    private TextView mProfileName;
-    private TextView mProfileDesc;
+    private TextView mTvProfileName;
+    private TextView mTvProfileDesc;
 
     private Context mContext;
     private SharedPreferences mSPUserProfile;
     private List<ProjectModel> mProjectList = new ArrayList<>();
+    private List<UserTeamListModel> mUserTeamList = new ArrayList<>();
+    private List<TeamProjectModel> mTeamProjectList = new ArrayList<>();
+    private ArrayAdapter<String> mUserTeamAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +95,8 @@ public class MainActivity extends BaseActivity
         initView();
         loadUserProfile();
         getUserProfile();
-        getAllProjects();
+        getUserTeamList();
+        //getAllProjects();
     }
 
     private void initView() {
@@ -108,8 +117,25 @@ public class MainActivity extends BaseActivity
 
         View navHeadView = mNavView.getHeaderView(0);
         mProfileImage = (CircleImageView) navHeadView.findViewById(R.id.profile_image);
-        mProfileName = (TextView) navHeadView.findViewById(R.id.profile_name);
-        mProfileDesc = (TextView) navHeadView.findViewById(R.id.profile_description);
+        mTvProfileName = (TextView) navHeadView.findViewById(R.id.profile_name);
+        mTvProfileDesc = (TextView) navHeadView.findViewById(R.id.profile_description);
+        Spinner spinnerProfileTeam = (Spinner) navHeadView.findViewById(R.id.profile_team_spinner);
+
+        mUserTeamAdapter = new ArrayAdapter<>(mContext, R.layout.spinner_item_team);
+        mUserTeamAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerProfileTeam.setAdapter(mUserTeamAdapter);
+
+        spinnerProfileTeam.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                getTeamProjects(mUserTeamList.get(position).getTeam_id());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         mProfileImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,8 +149,8 @@ public class MainActivity extends BaseActivity
         // FIXME: 16/3/17 add default avatar
         if (mSPUserProfile.getString(getString(R.string.text_sp_user_profile_uid), null) != null) {
             Picasso.with(mContext).load(Uri.parse(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_avatar), null))).into(mProfileImage);
-            mProfileName.setText(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_display_name), getString(R.string.text_profile_name)));
-            mProfileDesc.setText(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_desc), getString(R.string.text_profile_description)));
+            mTvProfileName.setText(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_display_name), getString(R.string.text_profile_name)));
+            mTvProfileDesc.setText(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_desc), getString(R.string.text_profile_description)));
         }
         LogUtils.i(TAG, "loadUserProfile");
     }
@@ -158,8 +184,6 @@ public class MainActivity extends BaseActivity
 
 
                     loadUserProfile();
-                    initProjectMenu();
-
 
                     LogUtils.i(TAG, "getUserProfile | onResponse | name = " + name);
 
@@ -175,6 +199,65 @@ public class MainActivity extends BaseActivity
         });
     }
 
+    private void getUserTeamList() {
+        TWApi.UserTeamListService userTeamListService = TWRetrofit.createService(TWApi.UserTeamListService.class, TWAccessToken.getAccessToken());
+        Call<List<UserTeamListModel>> userTeamsListCall = userTeamListService.getUserTeams();
+
+        userTeamsListCall.enqueue(new Callback<List<UserTeamListModel>>() {
+            @Override
+            public void onResponse(Call<List<UserTeamListModel>> call, Response<List<UserTeamListModel>> response) {
+                if (response.body() != null) {
+                    mUserTeamList = response.body();
+
+                    updateSpinnerData();
+                    getTeamProjects(mUserTeamList.get(0).getTeam_id());
+
+                    LogUtils.i(TAG, "getUserTeamList | onResponse ");
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<UserTeamListModel>> call, Throwable t) {
+                // FIXME: 16/3/22 user team list on failure
+            }
+        });
+    }
+
+    private void updateSpinnerData() {
+        mUserTeamAdapter.clear();
+        for (UserTeamListModel model : mUserTeamList) {
+            mUserTeamAdapter.add(model.getName());
+        }
+        mUserTeamAdapter.notifyDataSetChanged();
+
+        LogUtils.i(TAG, "updateSpinnerData");
+
+    }
+
+    private void getTeamProjects(String teamId) {
+        TWApi.TeamProjectListService teamProjectListService = TWRetrofit.createService(TWApi.TeamProjectListService.class, TWAccessToken.getAccessToken());
+        Call<List<TeamProjectModel>> teamProjectsCall = teamProjectListService.getTeamProjectList(teamId);
+        teamProjectsCall.enqueue(new Callback<List<TeamProjectModel>>() {
+            @Override
+            public void onResponse(Call<List<TeamProjectModel>> call, Response<List<TeamProjectModel>> response) {
+                if (response.body() != null) {
+                    mTeamProjectList = response.body();
+
+                    initTeamProjectMenu();
+
+                    LogUtils.i(TAG, "getTeamProjects | onResponse");
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<TeamProjectModel>> call, Throwable t) {
+
+            }
+        });
+    }
+
     private void getAllProjects() {
         TWApi.AllProjectsService allProjectsService = TWRetrofit.createService(TWApi.AllProjectsService.class, TWAccessToken.getAccessToken());
         Call<List<ProjectModel>> allProjectsCall = allProjectsService.getAllProjects();
@@ -184,7 +267,8 @@ public class MainActivity extends BaseActivity
                 if (response.body() != null) {
                     mProjectList.clear();
                     mProjectList = response.body();
-                    initProjectMenu();
+
+                    //initProjectMenu();
                 }
             }
 
@@ -195,13 +279,21 @@ public class MainActivity extends BaseActivity
         });
     }
 
-    private void initProjectMenu() {
+    private void initTeamProjectMenu() {
         Menu menu = mNavView.getMenu();
-        SubMenu projectMenu = menu.addSubMenu(getString(R.string.text_menu_project));
+        menu.removeGroup(233);
+        SubMenu projectMenu = menu.addSubMenu(233, Menu.NONE, Menu.NONE, getString(R.string.text_menu_project));
         int index = 0;
-        for (ProjectModel model : mProjectList) {
+        for (TeamProjectModel model : mTeamProjectList) {
             projectMenu.add(Menu.NONE, index++, Menu.NONE, model.getName()).setCheckable(true).setIcon(android.R.color.transparent);
         }
+
+        if (index == 0) {
+            projectMenu.add(Menu.NONE, index + 1, Menu.NONE, "该团队暂时没有项目").setCheckable(true).setIcon(android.R.color.transparent);
+        }
+
+        LogUtils.i(TAG, "initTeamProjectMenu");
+
     }
 
     @Override

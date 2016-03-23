@@ -22,12 +22,14 @@ import java.util.List;
 import me.fattycat.kun.teamwork.model.AccessTokenBody;
 import me.fattycat.kun.teamwork.model.AccessTokenModel;
 import me.fattycat.kun.teamwork.model.ProjectModel;
+import me.fattycat.kun.teamwork.model.TeamProjectModel;
 import me.fattycat.kun.teamwork.model.UserProfileModel;
 import me.fattycat.kun.teamwork.model.UserTeamListModel;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 
 public class TWApi {
     public static final String BASE_URL_OAUTH = "https://open.worktile.com/oauth2/";
@@ -51,6 +53,11 @@ public class TWApi {
     public interface UserTeamListService {
         @GET(BASE_URL_SCHEME + "teams")
         Call<List<UserTeamListModel>> getUserTeams();
+    }
+
+    public interface TeamProjectListService {
+        @GET(BASE_URL_SCHEME + "teams/{teamId}/projects")
+        Call<List<TeamProjectModel>> getTeamProjectList(@Path("teamId") String teamId);
     }
 
     public interface AllProjectsService {
