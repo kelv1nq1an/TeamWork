@@ -36,4 +36,6 @@ dependencies {
     compile 'com.roger.match.library:library:1.0.1'
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'de.hdodenhof:circleimageview:2.0.0'
+    compile 'com.github.Kennyc1012:MultiStateView:1.1.1'
+    compile 'com.github.jakob-grabner:Circle-Progress-View:v1.2.9'
 }

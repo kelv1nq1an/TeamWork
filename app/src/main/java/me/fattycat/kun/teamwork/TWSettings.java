@@ -19,10 +19,14 @@ package me.fattycat.kun.teamwork;
 
 import java.util.List;
 
+import me.fattycat.kun.teamwork.model.TeamProjectModel;
 import me.fattycat.kun.teamwork.model.UserTeamListModel;
 
 public class TWSettings {
     public static int sSelectedTeamPos;
     public static List<UserTeamListModel> sTeamList;
+
+    public static int sSelectedProjectPos;
+    public static List<TeamProjectModel> sProjectList;
 
 }

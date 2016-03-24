@@ -24,7 +24,9 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
@@ -50,10 +52,13 @@ import me.fattycat.kun.teamwork.TWAccessToken;
 import me.fattycat.kun.teamwork.TWApi;
 import me.fattycat.kun.teamwork.TWRetrofit;
 import me.fattycat.kun.teamwork.TWSettings;
+import me.fattycat.kun.teamwork.model.EntryModel;
 import me.fattycat.kun.teamwork.model.ProjectModel;
 import me.fattycat.kun.teamwork.model.TeamProjectModel;
 import me.fattycat.kun.teamwork.model.UserProfileModel;
 import me.fattycat.kun.teamwork.model.UserTeamListModel;
+import me.fattycat.kun.teamwork.ui.adapter.MainTabPagerAdapter;
+import me.fattycat.kun.teamwork.ui.fragment.EntryFragment;
 import me.fattycat.kun.teamwork.util.LogUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -71,6 +76,10 @@ public class MainActivity extends BaseActivity
     NavigationView mNavView;
     @Bind(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
+    @Bind(R.id.main_tabs)
+    TabLayout mTabLayout;
+    @Bind(R.id.container)
+    ViewPager mViewPager;
 
     private CircleImageView mProfileImage;
     private TextView mTvProfileName;
@@ -82,6 +91,7 @@ public class MainActivity extends BaseActivity
     private List<UserTeamListModel> mUserTeamList = new ArrayList<>();
     private List<TeamProjectModel> mTeamProjectList = new ArrayList<>();
     private ArrayAdapter<String> mUserTeamAdapter;
+    private MainTabPagerAdapter mMainTabPagerAdapter = new MainTabPagerAdapter(getSupportFragmentManager());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,12 +149,15 @@ public class MainActivity extends BaseActivity
             }
         });
 
+        // FIXME: 16/3/24 temporary refresh
         mProfileImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getUserProfile();
             }
         });
+
+        mTabLayout.setVisibility(View.GONE);
     }
 
     private void loadUserProfile() {
@@ -251,6 +264,7 @@ public class MainActivity extends BaseActivity
                 if (response.body() != null) {
                     mTeamProjectList = response.body();
 
+                    TWSettings.sProjectList = mTeamProjectList;
                     initTeamProjectMenu(false);
 
                     LogUtils.i(TAG, "getTeamProjects | onResponse");
@@ -319,6 +333,20 @@ public class MainActivity extends BaseActivity
                     .setIcon(android.R.color.transparent);
         }
 
+    }
+
+    private void initProjectEntryFragments(int entryNum, List<String> titles) {
+        mTabLayout.setVisibility(View.VISIBLE);
+
+        mMainTabPagerAdapter.clear();
+        for (int i = 0; i < entryNum; i++) {
+            TeamProjectModel project = mTeamProjectList.get(TWSettings.sSelectedProjectPos);
+            mMainTabPagerAdapter.addFragment(EntryFragment.newInstance(project.getPid()), titles.get(i));
+        }
+
+        mViewPager.setOffscreenPageLimit(3);
+        mViewPager.setAdapter(mMainTabPagerAdapter);
+        mTabLayout.setupWithViewPager(mViewPager);
 
     }
 
@@ -360,20 +388,40 @@ public class MainActivity extends BaseActivity
 
         } else if (id == R.id.nav_calendar) {
 
-        } else if (id == 1) {
-
-        } else if (id == 2) {
-
-        } else if (id == 3) {
-
-        } else if (id == 4) {
-
-        } else if (id == 5) {
-
+        } else {
+            TWSettings.sSelectedProjectPos = id;
+            getProjectEntries(id);
         }
 
         // FIXME: 16/3/22
-        //mDrawerLayout.closeDrawer(GravityCompat.START);
+        mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void getProjectEntries(int id) {
+        TWApi.ProjectEntryListService projectEntryListService = TWRetrofit.createService(TWApi.ProjectEntryListService.class, TWAccessToken.getAccessToken());
+        Call<List<EntryModel>> entryListCall = projectEntryListService.getProjectEntryList(mTeamProjectList.get(id).getPid());
+        entryListCall.enqueue(new Callback<List<EntryModel>>() {
+            @Override
+            public void onResponse(Call<List<EntryModel>> call, Response<List<EntryModel>> response) {
+                if (response.body() != null) {
+                    List<String> entryTitles = new ArrayList<>();
+                    int entryNum = 0;
+                    for (EntryModel entry : response.body()) {
+                        entryTitles.add(entry.getName());
+                        entryNum += 1;
+                    }
+
+                    initProjectEntryFragments(entryNum, entryTitles);
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<List<EntryModel>> call, Throwable t) {
+
+            }
+        });
+
     }
 }

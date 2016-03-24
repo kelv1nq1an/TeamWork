@@ -76,10 +76,10 @@ public class HomeActivity extends BaseActivity {
 
     private void initTabs() {
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        sectionsPagerAdapter.addFragments(new TeamFragment(), "团队");
-        sectionsPagerAdapter.addFragments(new UserFragment(), "我");
-        sectionsPagerAdapter.addFragments(new UserFragment(), "我");
-        sectionsPagerAdapter.addFragments(new UserFragment(), "我");
+        sectionsPagerAdapter.addFragment(new TeamFragment(), "团队");
+        sectionsPagerAdapter.addFragment(new UserFragment(), "我");
+        sectionsPagerAdapter.addFragment(new UserFragment(), "我");
+        sectionsPagerAdapter.addFragment(new UserFragment(), "我");
         mViewPager.setAdapter(sectionsPagerAdapter);
         mTabLayout.setupWithViewPager(mViewPager);
     }
@@ -109,7 +109,7 @@ public class HomeActivity extends BaseActivity {
             super(fm);
         }
 
-        public void addFragments(Fragment fragment, String title) {
+        public void addFragment(Fragment fragment, String title) {
             mFragments.add(fragment);
             mTitles.add(title);
         }
