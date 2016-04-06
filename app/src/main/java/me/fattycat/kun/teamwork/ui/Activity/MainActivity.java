@@ -41,8 +41,12 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -52,8 +56,9 @@ import me.fattycat.kun.teamwork.TWAccessToken;
 import me.fattycat.kun.teamwork.TWApi;
 import me.fattycat.kun.teamwork.TWRetrofit;
 import me.fattycat.kun.teamwork.TWSettings;
+import me.fattycat.kun.teamwork.event.TaskListEvent;
 import me.fattycat.kun.teamwork.model.EntryModel;
-import me.fattycat.kun.teamwork.model.ProjectModel;
+import me.fattycat.kun.teamwork.model.TaskModel;
 import me.fattycat.kun.teamwork.model.TeamProjectModel;
 import me.fattycat.kun.teamwork.model.UserProfileModel;
 import me.fattycat.kun.teamwork.model.UserTeamListModel;
@@ -87,11 +92,15 @@ public class MainActivity extends BaseActivity
 
     private Context mContext;
     private SharedPreferences mSPUserProfile;
-    private List<ProjectModel> mProjectList = new ArrayList<>();
     private List<UserTeamListModel> mUserTeamList = new ArrayList<>();
     private List<TeamProjectModel> mTeamProjectList = new ArrayList<>();
+    private List<TaskModel> mTaskModelAll = new ArrayList<>();
+    private List<EntryModel> mEntryList = new ArrayList<>();
+    private Map<String, String> mTitlesMap = new HashMap<>();
+    private Map<String, List<TaskModel>> mTaskListMap = new HashMap<>();
     private ArrayAdapter<String> mUserTeamAdapter;
     private MainTabPagerAdapter mMainTabPagerAdapter = new MainTabPagerAdapter(getSupportFragmentManager());
+    private String mPid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,7 +116,6 @@ public class MainActivity extends BaseActivity
         loadUserProfile();
         getUserProfile();
         getUserTeamList();
-        //getAllProjects();
     }
 
     private void initView() {
@@ -158,6 +166,7 @@ public class MainActivity extends BaseActivity
         });
 
         mTabLayout.setVisibility(View.GONE);
+        mDrawerLayout.openDrawer(GravityCompat.START);
     }
 
     private void loadUserProfile() {
@@ -168,6 +177,20 @@ public class MainActivity extends BaseActivity
             mTvProfileDesc.setText(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_desc), getString(R.string.text_profile_description)));
         }
         LogUtils.i(TAG, "loadUserProfile");
+    }
+
+    private void updateSpinnerData() {
+        mUserTeamAdapter.clear();
+        for (UserTeamListModel model : mUserTeamList) {
+            mUserTeamAdapter.add(model.getName());
+        }
+        mUserTeamAdapter.notifyDataSetChanged();
+
+        TWSettings.sTeamList = mUserTeamList;
+        TWSettings.sSelectedTeamPos = 0;
+
+        LogUtils.i(TAG, "updateSpinnerData");
+
     }
 
     private void getUserProfile() {
@@ -196,7 +219,6 @@ public class MainActivity extends BaseActivity
                             .putString(getString(R.string.text_sp_user_profile_email), email)
                             .putInt(getString(R.string.text_sp_user_profile_online), online)
                             .apply();
-
 
                     loadUserProfile();
 
@@ -239,20 +261,6 @@ public class MainActivity extends BaseActivity
         });
     }
 
-    private void updateSpinnerData() {
-        mUserTeamAdapter.clear();
-        for (UserTeamListModel model : mUserTeamList) {
-            mUserTeamAdapter.add(model.getName());
-        }
-        mUserTeamAdapter.notifyDataSetChanged();
-
-        TWSettings.sTeamList = mUserTeamList;
-        TWSettings.sSelectedTeamPos = 0;
-
-        LogUtils.i(TAG, "updateSpinnerData");
-
-    }
-
     private void getTeamProjects(String teamId) {
         initTeamProjectMenu(true);
 
@@ -274,28 +282,66 @@ public class MainActivity extends BaseActivity
 
             @Override
             public void onFailure(Call<List<TeamProjectModel>> call, Throwable t) {
-
+                // FIXME: 16/4/6
             }
         });
     }
 
-    private void getAllProjects() {
-        TWApi.AllProjectsService allProjectsService = TWRetrofit.createService(TWApi.AllProjectsService.class, TWAccessToken.getAccessToken());
-        Call<List<ProjectModel>> allProjectsCall = allProjectsService.getAllProjects();
-        allProjectsCall.enqueue(new Callback<List<ProjectModel>>() {
+    private void getProjectEntries(int id) {
+        TWApi.ProjectEntryListService projectEntryListService = TWRetrofit.createService(TWApi.ProjectEntryListService.class, TWAccessToken.getAccessToken());
+        Call<List<EntryModel>> entryListCall = projectEntryListService.getProjectEntryList(mTeamProjectList.get(id).getPid());
+        entryListCall.enqueue(new Callback<List<EntryModel>>() {
             @Override
-            public void onResponse(Call<List<ProjectModel>> call, Response<List<ProjectModel>> response) {
+            public void onResponse(Call<List<EntryModel>> call, Response<List<EntryModel>> response) {
                 if (response.body() != null) {
-                    mProjectList.clear();
-                    mProjectList = response.body();
+                    mEntryList = response.body();
 
-                    //initProjectMenu();
+                    List<String> entryTitles = new ArrayList<>();
+                    int entryNum = 0;
+                    for (EntryModel entry : response.body()) {
+                        mTitlesMap.put(entry.getEntry_id(), entry.getName());
+                        entryTitles.add(entry.getName());
+                        entryNum += 1;
+                    }
+
+                    initProjectEntryFragments(entryNum, entryTitles);
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<List<EntryModel>> call, Throwable t) {
+                // FIXME: 16/4/6
+            }
+        });
+
+    }
+
+    private void getTaskList() {
+        LogUtils.i(TAG, "getTaskList");
+
+        TWApi.TaskListService taskListService = TWRetrofit.createService(TWApi.TaskListService.class, TWAccessToken.getAccessToken());
+        Call<List<TaskModel>> taskListCall = taskListService.getTaskList(mPid);
+        taskListCall.enqueue(new Callback<List<TaskModel>>() {
+            @Override
+            public void onResponse(Call<List<TaskModel>> call, Response<List<TaskModel>> response) {
+                if (response.body() != null) {
+                    mTaskModelAll = response.body();
+                    for (TaskModel task : response.body()) {
+                        List<TaskModel> taskList = mTaskListMap.get(task.getEntry_name());
+                        if (taskList != null) {
+                            taskList.add(task);
+                        }
+                    }
+
+                    EventBus.getDefault().post(new TaskListEvent(mTaskListMap));
+                    LogUtils.i(TAG, "getTaskList | onResponse");
                 }
             }
 
             @Override
-            public void onFailure(Call<List<ProjectModel>> call, Throwable t) {
-                // FIXME: 16/3/22
+            public void onFailure(Call<List<TaskModel>> call, Throwable t) {
+                // FIXME: 16/4/6
             }
         });
     }
@@ -339,10 +385,16 @@ public class MainActivity extends BaseActivity
         mTabLayout.setVisibility(View.VISIBLE);
 
         mMainTabPagerAdapter.clear();
+        TeamProjectModel project = mTeamProjectList.get(TWSettings.sSelectedProjectPos);
+        mPid = project.getPid();
+
         for (int i = 0; i < entryNum; i++) {
-            TeamProjectModel project = mTeamProjectList.get(TWSettings.sSelectedProjectPos);
-            mMainTabPagerAdapter.addFragment(EntryFragment.newInstance(project.getPid()), titles.get(i));
+            // FIXME: 16/4/6 entry id
+            mMainTabPagerAdapter.addFragment(EntryFragment.newInstance(mPid, titles.get(i)), titles.get(i));
+            mTaskListMap.put(titles.get(i), new ArrayList<TaskModel>());
         }
+
+        getTaskList();
 
         mViewPager.setOffscreenPageLimit(3);
         mViewPager.setAdapter(mMainTabPagerAdapter);
@@ -398,30 +450,4 @@ public class MainActivity extends BaseActivity
         return true;
     }
 
-    private void getProjectEntries(int id) {
-        TWApi.ProjectEntryListService projectEntryListService = TWRetrofit.createService(TWApi.ProjectEntryListService.class, TWAccessToken.getAccessToken());
-        Call<List<EntryModel>> entryListCall = projectEntryListService.getProjectEntryList(mTeamProjectList.get(id).getPid());
-        entryListCall.enqueue(new Callback<List<EntryModel>>() {
-            @Override
-            public void onResponse(Call<List<EntryModel>> call, Response<List<EntryModel>> response) {
-                if (response.body() != null) {
-                    List<String> entryTitles = new ArrayList<>();
-                    int entryNum = 0;
-                    for (EntryModel entry : response.body()) {
-                        entryTitles.add(entry.getName());
-                        entryNum += 1;
-                    }
-
-                    initProjectEntryFragments(entryNum, entryTitles);
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<List<EntryModel>> call, Throwable t) {
-
-            }
-        });
-
-    }
 }

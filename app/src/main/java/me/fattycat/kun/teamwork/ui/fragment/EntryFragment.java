@@ -27,6 +27,9 @@ import android.view.ViewGroup;
 
 import com.kennyc.view.MultiStateView;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.util.List;
 
 import butterknife.Bind;
@@ -35,6 +38,7 @@ import me.fattycat.kun.teamwork.R;
 import me.fattycat.kun.teamwork.TWAccessToken;
 import me.fattycat.kun.teamwork.TWApi;
 import me.fattycat.kun.teamwork.TWRetrofit;
+import me.fattycat.kun.teamwork.event.TaskListEvent;
 import me.fattycat.kun.teamwork.model.TaskModel;
 import me.fattycat.kun.teamwork.ui.adapter.EntryRvAdapter;
 import me.fattycat.kun.teamwork.util.LogUtils;
@@ -45,6 +49,7 @@ import retrofit2.Response;
 public class EntryFragment extends BaseFragment {
     private static final String TAG = "TW_EntryFragment";
     private static final String ARG_PROJECT_ID = "pid";
+    private static final String ARG_ENTRY_NAME = "entry_name";
 
     @Bind(R.id.fragment_entry_list)
     RecyclerView mEntryRecyclerView;
@@ -52,6 +57,7 @@ public class EntryFragment extends BaseFragment {
     MultiStateView mMultiStateView;
 
     private String mPid;
+    private String mEntryName;
     private EntryRvAdapter mEntryRvAdapter = new EntryRvAdapter();
 
     @Override
@@ -60,7 +66,10 @@ public class EntryFragment extends BaseFragment {
 
         if (getArguments() != null) {
             mPid = getArguments().getString(ARG_PROJECT_ID);
+            mEntryName = getArguments().getString(ARG_ENTRY_NAME);
         }
+
+        EventBus.getDefault().register(this);
     }
 
     @Nullable
@@ -77,7 +86,7 @@ public class EntryFragment extends BaseFragment {
     public void onResume() {
         super.onResume();
 
-        getTaskList();
+        //getTaskList();
 
     }
 
@@ -85,6 +94,13 @@ public class EntryFragment extends BaseFragment {
     public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.unbind(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        EventBus.getDefault().unregister(this);
     }
 
     private void getTaskList() {
@@ -110,10 +126,11 @@ public class EntryFragment extends BaseFragment {
         });
     }
 
-    public static EntryFragment newInstance(String pid) {
+    public static EntryFragment newInstance(String pid, String entryName) {
         EntryFragment entryFragment = new EntryFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PROJECT_ID, pid);
+        args.putString(ARG_ENTRY_NAME, entryName);
         entryFragment.setArguments(args);
         return entryFragment;
     }
@@ -121,6 +138,17 @@ public class EntryFragment extends BaseFragment {
     private void initView() {
         mEntryRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         mEntryRecyclerView.setAdapter(mEntryRvAdapter);
+    }
+
+    @Subscribe
+    public void onGetTaskList(TaskListEvent event) {
+        LogUtils.i(TAG, "onGetTaskList | event bus receive");
+        if (event.taskModelListMap.size() == 0) {
+            mMultiStateView.setViewState(MultiStateView.VIEW_STATE_EMPTY);
+            return;
+        }
+        mMultiStateView.setViewState(MultiStateView.VIEW_STATE_CONTENT);
+        mEntryRvAdapter.setData(event.taskModelListMap.get(mEntryName));
     }
 
 }
