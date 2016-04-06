@@ -385,6 +385,7 @@ public class MainActivity extends BaseActivity
         mTabLayout.setVisibility(View.VISIBLE);
 
         mMainTabPagerAdapter.clear();
+        mTaskListMap.clear();
         TeamProjectModel project = mTeamProjectList.get(TWSettings.sSelectedProjectPos);
         mPid = project.getPid();
 

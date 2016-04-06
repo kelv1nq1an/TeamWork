@@ -17,7 +17,10 @@
  */
 package me.fattycat.kun.teamwork.model;
 
-public class UserTeamListModel {
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
+public class UserTeamListModel extends RealmObject {
 
     /**
      * team_id : b809bef616fd4faa994a84ac61f922a1
@@ -28,7 +31,7 @@ public class UserTeamListModel {
      * visibility : 1
      * create_by : {"uid":"679efdf3960d45a0b8679693098135ff","name":"gonglinjie","display_name":"龚林杰","avatar":"default_avatar.png","desc":"","status":3,"online":0}
      */
-
+    @PrimaryKey
     private String team_id;
     private String url;
     private String name;
@@ -101,71 +104,5 @@ public class UserTeamListModel {
 
     public void setCreate_by(CreateByEntity create_by) {
         this.create_by = create_by;
-    }
-
-    public static class CreateByEntity {
-        private String uid;
-        private String name;
-        private String display_name;
-        private String avatar;
-        private String desc;
-        private int status;
-        private int online;
-
-        public String getUid() {
-            return uid;
-        }
-
-        public void setUid(String uid) {
-            this.uid = uid;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getDisplay_name() {
-            return display_name;
-        }
-
-        public void setDisplay_name(String display_name) {
-            this.display_name = display_name;
-        }
-
-        public String getAvatar() {
-            return avatar;
-        }
-
-        public void setAvatar(String avatar) {
-            this.avatar = avatar;
-        }
-
-        public String getDesc() {
-            return desc;
-        }
-
-        public void setDesc(String desc) {
-            this.desc = desc;
-        }
-
-        public int getStatus() {
-            return status;
-        }
-
-        public void setStatus(int status) {
-            this.status = status;
-        }
-
-        public int getOnline() {
-            return online;
-        }
-
-        public void setOnline(int online) {
-            this.online = online;
-        }
     }
 }

@@ -143,12 +143,17 @@ public class EntryFragment extends BaseFragment {
     @Subscribe
     public void onGetTaskList(TaskListEvent event) {
         LogUtils.i(TAG, "onGetTaskList | event bus receive");
-        if (event.taskModelListMap.size() == 0) {
-            mMultiStateView.setViewState(MultiStateView.VIEW_STATE_EMPTY);
+
+        if (event.taskModelListMap != null
+                && event.taskModelListMap.size() != 0
+                && event.taskModelListMap.get(mEntryName) != null
+                && event.taskModelListMap.get(mEntryName).size() != 0) {
+            mMultiStateView.setViewState(MultiStateView.VIEW_STATE_CONTENT);
+            mEntryRvAdapter.setData(event.taskModelListMap.get(mEntryName));
             return;
         }
-        mMultiStateView.setViewState(MultiStateView.VIEW_STATE_CONTENT);
-        mEntryRvAdapter.setData(event.taskModelListMap.get(mEntryName));
+        mMultiStateView.setViewState(MultiStateView.VIEW_STATE_EMPTY);
+
     }
 
 }

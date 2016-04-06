@@ -30,6 +30,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import me.fattycat.kun.teamwork.R;
 import me.fattycat.kun.teamwork.model.TaskModel;
+import me.fattycat.kun.teamwork.model.TodosEntity;
 
 public class EntryRvAdapter extends RecyclerView.Adapter<EntryRvAdapter.EntryViewHolder> {
     private static final String TAG = "TW_EntryRvAdapter";
@@ -67,7 +68,7 @@ public class EntryRvAdapter extends RecyclerView.Adapter<EntryRvAdapter.EntryVie
         int todoNum = task.getTodos().size();
         int completed = task.getCompleted();
         int todoCheckNum = 0;
-        for (TaskModel.TodosEntity todo : task.getTodos()) {
+        for (TodosEntity todo : task.getTodos()) {
             if (todo.getChecked() == 1)
                 todoCheckNum += 1;
         }

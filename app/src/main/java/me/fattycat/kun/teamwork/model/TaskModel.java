@@ -19,7 +19,12 @@ package me.fattycat.kun.teamwork.model;
 
 import java.util.List;
 
-public class TaskModel {
+import io.realm.RealmList;
+import io.realm.RealmObject;
+import io.realm.annotations.Ignore;
+import io.realm.annotations.PrimaryKey;
+
+public class TaskModel extends RealmObject {
 
     /**
      * name :
@@ -45,6 +50,7 @@ public class TaskModel {
 
     private String name;
     private String pid;
+    @PrimaryKey
     private String tid;
     private String entry_id;
     private String entry_name;
@@ -72,6 +78,7 @@ public class TaskModel {
      */
 
     private ProjectEntity project;
+    @Ignore
     private List<?> labels;
     /**
      * todo_id :
@@ -80,7 +87,7 @@ public class TaskModel {
      * pos : 65535
      */
 
-    private List<TodosEntity> todos;
+    private RealmList<TodosEntity> todos;
     /**
      * uid :
      * name :
@@ -92,7 +99,7 @@ public class TaskModel {
      * online : 0
      */
 
-    private List<WatchersEntity> watchers;
+    private RealmList<WatchersEntity> watchers;
     /**
      * uid :
      * name :
@@ -104,7 +111,8 @@ public class TaskModel {
      * online : 0
      */
 
-    private List<MembersEntity> members;
+    private RealmList<MembersEntity> members;
+    @Ignore
     private List<?> files;
 
     public String getName() {
@@ -231,7 +239,7 @@ public class TaskModel {
         return todos;
     }
 
-    public void setTodos(List<TodosEntity> todos) {
+    public void setTodos(RealmList<TodosEntity> todos) {
         this.todos = todos;
     }
 
@@ -239,7 +247,7 @@ public class TaskModel {
         return watchers;
     }
 
-    public void setWatchers(List<WatchersEntity> watchers) {
+    public void setWatchers(RealmList<WatchersEntity> watchers) {
         this.watchers = watchers;
     }
 
@@ -247,7 +255,7 @@ public class TaskModel {
         return members;
     }
 
-    public void setMembers(List<MembersEntity> members) {
+    public void setMembers(RealmList<MembersEntity> members) {
         this.members = members;
     }
 
@@ -257,281 +265,5 @@ public class TaskModel {
 
     public void setFiles(List<?> files) {
         this.files = files;
-    }
-
-    public static class BadgesEntity {
-        private String expire_date;
-        private int comment_count;
-        private int todo_checked_count;
-        private int todo_count;
-        private int file_count;
-
-        public String getExpire_date() {
-            return expire_date;
-        }
-
-        public void setExpire_date(String expire_date) {
-            this.expire_date = expire_date;
-        }
-
-        public int getComment_count() {
-            return comment_count;
-        }
-
-        public void setComment_count(int comment_count) {
-            this.comment_count = comment_count;
-        }
-
-        public int getTodo_checked_count() {
-            return todo_checked_count;
-        }
-
-        public void setTodo_checked_count(int todo_checked_count) {
-            this.todo_checked_count = todo_checked_count;
-        }
-
-        public int getTodo_count() {
-            return todo_count;
-        }
-
-        public void setTodo_count(int todo_count) {
-            this.todo_count = todo_count;
-        }
-
-        public int getFile_count() {
-            return file_count;
-        }
-
-        public void setFile_count(int file_count) {
-            this.file_count = file_count;
-        }
-    }
-
-    public static class ProjectEntity {
-        private String pid;
-        private String name;
-        private String pic;
-        private String bg;
-
-        public String getPid() {
-            return pid;
-        }
-
-        public void setPid(String pid) {
-            this.pid = pid;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getPic() {
-            return pic;
-        }
-
-        public void setPic(String pic) {
-            this.pic = pic;
-        }
-
-        public String getBg() {
-            return bg;
-        }
-
-        public void setBg(String bg) {
-            this.bg = bg;
-        }
-    }
-
-    public static class TodosEntity {
-        private String todo_id;
-        private String name;
-        private int checked;
-        private int pos;
-
-        public String getTodo_id() {
-            return todo_id;
-        }
-
-        public void setTodo_id(String todo_id) {
-            this.todo_id = todo_id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public int getChecked() {
-            return checked;
-        }
-
-        public void setChecked(int checked) {
-            this.checked = checked;
-        }
-
-        public int getPos() {
-            return pos;
-        }
-
-        public void setPos(int pos) {
-            this.pos = pos;
-        }
-    }
-
-    public static class WatchersEntity {
-        private String uid;
-        private String name;
-        private String display_name;
-        private String email;
-        private String avatar;
-        private String desc;
-        private int status;
-        private int online;
-
-        public String getUid() {
-            return uid;
-        }
-
-        public void setUid(String uid) {
-            this.uid = uid;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getDisplay_name() {
-            return display_name;
-        }
-
-        public void setDisplay_name(String display_name) {
-            this.display_name = display_name;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public String getAvatar() {
-            return avatar;
-        }
-
-        public void setAvatar(String avatar) {
-            this.avatar = avatar;
-        }
-
-        public String getDesc() {
-            return desc;
-        }
-
-        public void setDesc(String desc) {
-            this.desc = desc;
-        }
-
-        public int getStatus() {
-            return status;
-        }
-
-        public void setStatus(int status) {
-            this.status = status;
-        }
-
-        public int getOnline() {
-            return online;
-        }
-
-        public void setOnline(int online) {
-            this.online = online;
-        }
-    }
-
-    public static class MembersEntity {
-        private String uid;
-        private String name;
-        private String display_name;
-        private String email;
-        private String avatar;
-        private String desc;
-        private int status;
-        private int online;
-
-        public String getUid() {
-            return uid;
-        }
-
-        public void setUid(String uid) {
-            this.uid = uid;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getDisplay_name() {
-            return display_name;
-        }
-
-        public void setDisplay_name(String display_name) {
-            this.display_name = display_name;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public String getAvatar() {
-            return avatar;
-        }
-
-        public void setAvatar(String avatar) {
-            this.avatar = avatar;
-        }
-
-        public String getDesc() {
-            return desc;
-        }
-
-        public void setDesc(String desc) {
-            this.desc = desc;
-        }
-
-        public int getStatus() {
-            return status;
-        }
-
-        public void setStatus(int status) {
-            this.status = status;
-        }
-
-        public int getOnline() {
-            return online;
-        }
-
-        public void setOnline(int online) {
-            this.online = online;
-        }
     }
 }

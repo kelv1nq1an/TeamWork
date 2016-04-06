@@ -19,7 +19,10 @@ package me.fattycat.kun.teamwork.model;
 
 import java.util.List;
 
-public class TeamProjectModel {
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
+public class TeamProjectModel extends RealmObject {
 
     /**
      * pid : 8f0835b2691e413da58d715a1414eeac
@@ -38,7 +41,7 @@ public class TeamProjectModel {
      * curr_role : 1
      * permission : 31
      */
-
+    @PrimaryKey
     private String pid;
     private String name;
     private String name_pinyin;
@@ -53,7 +56,6 @@ public class TeamProjectModel {
     private int member_count;
     private int curr_role;
     private int permission;
-    private List<?> admins;
 
     public String getPid() {
         return pid;
@@ -167,11 +169,4 @@ public class TeamProjectModel {
         this.permission = permission;
     }
 
-    public List<?> getAdmins() {
-        return admins;
-    }
-
-    public void setAdmins(List<?> admins) {
-        this.admins = admins;
-    }
 }

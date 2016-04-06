@@ -17,7 +17,10 @@
  */
 package me.fattycat.kun.teamwork.model;
 
-public class ProjectModel {
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
+public class ProjectModel extends RealmObject {
     /**
      * pid : eda54f766b7f457ea7cdb5a93c6d892e
      * name : Worktile 开发
@@ -33,7 +36,7 @@ public class ProjectModel {
      * curr_role : 1
      * permission : 31
      */
-
+    @PrimaryKey
     private String pid;
     private String name;
     private String team_id;

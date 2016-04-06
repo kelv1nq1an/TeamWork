@@ -20,6 +20,8 @@ package me.fattycat.kun.teamwork;
 import android.app.Application;
 import android.content.Context;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import me.fattycat.kun.teamwork.util.ToastUtils;
 
 public class App extends Application {
@@ -33,6 +35,13 @@ public class App extends Application {
         sContext = this;
         sDebug = true;
         ToastUtils.register(sContext);
+
+        RealmConfiguration config = new RealmConfiguration.Builder(this)
+                .name("Teamwork.realm")
+                .schemaVersion(1)
+                .build();
+
+        Realm.setDefaultConfiguration(config);
     }
 
 }

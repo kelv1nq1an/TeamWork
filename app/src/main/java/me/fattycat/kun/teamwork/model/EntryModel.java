@@ -17,7 +17,10 @@
  */
 package me.fattycat.kun.teamwork.model;
 
-public class EntryModel {
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
+public class EntryModel extends RealmObject {
 
     /**
      * entry_id : 8250575aed6749769f1db93dd7d00bd3
@@ -27,7 +30,7 @@ public class EntryModel {
      * updated_at : 2016-03-16T05:58:25.453Z
      * watched : false
      */
-
+    @PrimaryKey
     private String entry_id;
     private String name;
     private int pos;
