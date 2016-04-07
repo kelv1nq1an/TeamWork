@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program;  if not, see <http://www.gnu.org/licenses/>.
  */
-package me.fattycat.kun.teamwork.ui.activity;
+package me.fattycat.kun.teamwork.ui.Activity;
 
 import android.content.Context;
 import android.net.Uri;
@@ -319,16 +319,11 @@ public class MainActivity extends BaseActivity
                         public void execute(Realm realm) {
                             // FIXME: 16/4/7 group
                             mRealm.clear(EntryModel.class);
-                            mRealm.copyToRealmOrUpdate(entryModel);
+                            mRealm.copyToRealm(entryModel);
                         }
                     });
 
-                    List<String> entryTitles = new ArrayList<>();
-                    for (EntryModel entry : response.body()) {
-                        entryTitles.add(entry.getName());
-                    }
-
-                    initProjectEntryFragments(entryTitles);
+                    initProjectEntryFragments();
                 }
 
             }
@@ -413,7 +408,7 @@ public class MainActivity extends BaseActivity
 
     }
 
-    private void initProjectEntryFragments(List<String> titles) {
+    private void initProjectEntryFragments() {
         mTabLayout.setVisibility(View.VISIBLE);
 
         mMainTabPagerAdapter.clear();
@@ -425,7 +420,8 @@ public class MainActivity extends BaseActivity
         for (EntryModel entryModel : entryModelRealmResults) {
             String entryId = entryModel.getEntry_id();
             String entryName = entryModel.getName();
-            mMainTabPagerAdapter.addFragment(EntryFragment.newInstance(mPid, entryId), entryName);
+            mMainTabPagerAdapter.addFragment(EntryFragment.newInstance(entryId), entryName);
+            mMainTabPagerAdapter.notifyDataSetChanged();
             mTaskListMap.put(entryId, new ArrayList<TaskModel>());
         }
 

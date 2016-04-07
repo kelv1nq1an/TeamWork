@@ -17,6 +17,7 @@
  */
 package me.fattycat.kun.teamwork.ui.fragment;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -30,29 +31,19 @@ import com.kennyc.view.MultiStateView;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.List;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import io.realm.Realm;
-import io.realm.RealmMigration;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import me.fattycat.kun.teamwork.R;
-import me.fattycat.kun.teamwork.TWAccessToken;
-import me.fattycat.kun.teamwork.TWApi;
-import me.fattycat.kun.teamwork.TWRetrofit;
 import me.fattycat.kun.teamwork.event.TaskListEvent;
 import me.fattycat.kun.teamwork.model.TaskModel;
 import me.fattycat.kun.teamwork.ui.adapter.EntryRvAdapter;
 import me.fattycat.kun.teamwork.util.LogUtils;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class EntryFragment extends BaseFragment {
     private static final String TAG = "TW_EntryFragment";
-    private static final String ARG_PROJECT_ID = "pid";
     private static final String ARG_ENTRY_ID = "entry_id";
 
     @Bind(R.id.fragment_entry_list)
@@ -60,7 +51,7 @@ public class EntryFragment extends BaseFragment {
     @Bind(R.id.entry_multi_state_view)
     MultiStateView mMultiStateView;
 
-    private String mPid;
+    private EntryFragment me;
     private String mEntryId;
     private EntryRvAdapter mEntryRvAdapter = new EntryRvAdapter();
     private Realm mRealm;
@@ -69,10 +60,12 @@ public class EntryFragment extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        me = this;
         if (getArguments() != null) {
-            mPid = getArguments().getString(ARG_PROJECT_ID);
             mEntryId = getArguments().getString(ARG_ENTRY_ID);
         }
+        LogUtils.i(TAG, "onCreate | id = " + mEntryId);
+
         mRealm = Realm.getDefaultInstance();
         EventBus.getDefault().register(this);
     }
@@ -91,6 +84,11 @@ public class EntryFragment extends BaseFragment {
     public void onResume() {
         super.onResume();
 
+        if (getArguments() != null) {
+            mEntryId = getArguments().getString(ARG_ENTRY_ID);
+        }
+        LogUtils.i(TAG, "onResume | id = " + mEntryId + " | " + me);
+
         //getTaskList();
 
     }
@@ -108,37 +106,6 @@ public class EntryFragment extends BaseFragment {
         EventBus.getDefault().unregister(this);
     }
 
-    private void getTaskList() {
-        LogUtils.i(TAG, "getTaskList");
-
-        TWApi.TaskListService taskListService = TWRetrofit.createService(TWApi.TaskListService.class, TWAccessToken.getAccessToken());
-        Call<List<TaskModel>> taskListCall = taskListService.getTaskList(mPid);
-        taskListCall.enqueue(new Callback<List<TaskModel>>() {
-            @Override
-            public void onResponse(Call<List<TaskModel>> call, Response<List<TaskModel>> response) {
-                if (response.body() != null) {
-
-                    final List<TaskModel> taskModels = response.body();
-                    mRealm.executeTransaction(new Realm.Transaction() {
-                        @Override
-                        public void execute(Realm realm) {
-                            mRealm.copyToRealm(taskModels);
-                        }
-                    });
-
-                    LogUtils.i(TAG, "getTaskList | onResponse");
-
-                    updateData();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<TaskModel>> call, Throwable t) {
-
-            }
-        });
-    }
-
     private void updateData() {
         mMultiStateView.setViewState(MultiStateView.VIEW_STATE_CONTENT);
 
@@ -147,12 +114,12 @@ public class EntryFragment extends BaseFragment {
         mEntryRvAdapter.setData(results);
     }
 
-    public static EntryFragment newInstance(String pid, String entryId) {
+    public static EntryFragment newInstance(String entryId) {
         EntryFragment entryFragment = new EntryFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PROJECT_ID, pid);
         args.putString(ARG_ENTRY_ID, entryId);
         entryFragment.setArguments(args);
+        LogUtils.i(TAG, "newInstance | id = " + entryId + " | " + entryFragment);
         return entryFragment;
     }
 
@@ -163,7 +130,7 @@ public class EntryFragment extends BaseFragment {
 
     @Subscribe
     public void onGetTaskList(TaskListEvent event) {
-        LogUtils.i(TAG, "onGetTaskList | event bus receive");
+        LogUtils.i(TAG, "onGetTaskList | event bus receive | " + me);
 
         if (event.taskModelListMap != null
                 && event.taskModelListMap.size() != 0

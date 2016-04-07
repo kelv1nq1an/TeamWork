@@ -9,7 +9,7 @@
     android:fitsSystemWindows="true"
     android:gravity="center"
     android:orientation="vertical"
-    tools:context=".ui.activity.LoginActivity">
+    tools:context=".ui.Activity.LoginActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
