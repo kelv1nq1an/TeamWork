@@ -1,4 +1,4 @@
-package me.fattycat.kun.teamwork.ui.Activity;
+package me.fattycat.kun.teamwork.ui.activity;
 
 import android.content.Context;
 import android.content.Intent;
