@@ -17,7 +17,6 @@
  */
 package me.fattycat.kun.teamwork.ui.fragment;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -40,7 +39,6 @@ import me.fattycat.kun.teamwork.R;
 import me.fattycat.kun.teamwork.event.TaskListEvent;
 import me.fattycat.kun.teamwork.model.TaskModel;
 import me.fattycat.kun.teamwork.ui.adapter.EntryRvAdapter;
-import me.fattycat.kun.teamwork.util.LogUtils;
 
 public class EntryFragment extends BaseFragment {
     private static final String TAG = "TW_EntryFragment";
@@ -51,7 +49,6 @@ public class EntryFragment extends BaseFragment {
     @Bind(R.id.entry_multi_state_view)
     MultiStateView mMultiStateView;
 
-    private EntryFragment me;
     private String mEntryId;
     private EntryRvAdapter mEntryRvAdapter = new EntryRvAdapter();
     private Realm mRealm;
@@ -60,11 +57,9 @@ public class EntryFragment extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        me = this;
         if (getArguments() != null) {
             mEntryId = getArguments().getString(ARG_ENTRY_ID);
         }
-        LogUtils.i(TAG, "onCreate | id = " + mEntryId);
 
         mRealm = Realm.getDefaultInstance();
         EventBus.getDefault().register(this);
@@ -81,19 +76,6 @@ public class EntryFragment extends BaseFragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-
-        if (getArguments() != null) {
-            mEntryId = getArguments().getString(ARG_ENTRY_ID);
-        }
-        LogUtils.i(TAG, "onResume | id = " + mEntryId + " | " + me);
-
-        //getTaskList();
-
-    }
-
-    @Override
     public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.unbind(this);
@@ -103,7 +85,6 @@ public class EntryFragment extends BaseFragment {
     public void onDestroy() {
         super.onDestroy();
         mRealm.close();
-        LogUtils.i(TAG, "onDestroy | " + me);
         EventBus.getDefault().unregister(this);
     }
 
@@ -120,7 +101,6 @@ public class EntryFragment extends BaseFragment {
         Bundle args = new Bundle();
         args.putString(ARG_ENTRY_ID, entryId);
         entryFragment.setArguments(args);
-        LogUtils.i(TAG, "newInstance | id = " + entryId + " | " + entryFragment);
         return entryFragment;
     }
 
@@ -131,8 +111,6 @@ public class EntryFragment extends BaseFragment {
 
     @Subscribe
     public void onGetTaskList(TaskListEvent event) {
-        LogUtils.i(TAG, "onGetTaskList | event bus receive | " + me);
-
         if (event.taskModelListMap != null
                 && event.taskModelListMap.size() != 0
                 && event.taskModelListMap.get(mEntryId) != null
