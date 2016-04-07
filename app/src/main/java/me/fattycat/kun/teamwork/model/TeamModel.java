@@ -20,7 +20,7 @@ package me.fattycat.kun.teamwork.model;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
-public class UserTeamListModel extends RealmObject {
+public class TeamModel extends RealmObject {
 
     /**
      * team_id : b809bef616fd4faa994a84ac61f922a1

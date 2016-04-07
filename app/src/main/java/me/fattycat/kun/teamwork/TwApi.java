@@ -26,7 +26,7 @@ import me.fattycat.kun.teamwork.model.ProjectModel;
 import me.fattycat.kun.teamwork.model.TaskModel;
 import me.fattycat.kun.teamwork.model.TeamProjectModel;
 import me.fattycat.kun.teamwork.model.UserProfileModel;
-import me.fattycat.kun.teamwork.model.UserTeamListModel;
+import me.fattycat.kun.teamwork.model.TeamModel;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -55,7 +55,7 @@ public class TWApi {
 
     public interface UserTeamListService {
         @GET(BASE_URL_SCHEME + "teams")
-        Call<List<UserTeamListModel>> getUserTeams();
+        Call<List<TeamModel>> getUserTeams();
     }
 
     public interface TeamProjectListService {

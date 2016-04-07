@@ -22,6 +22,7 @@ import android.content.Context;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.exceptions.RealmMigrationNeededException;
 import me.fattycat.kun.teamwork.util.ToastUtils;
 
 public class App extends Application {
@@ -42,6 +43,13 @@ public class App extends Application {
                 .build();
 
         Realm.setDefaultConfiguration(config);
+
+        try {
+            Realm.getInstance(config);
+        } catch (RealmMigrationNeededException e) {
+            Realm.deleteRealm(config);
+            Realm.getInstance(config);
+        }
     }
 
 }

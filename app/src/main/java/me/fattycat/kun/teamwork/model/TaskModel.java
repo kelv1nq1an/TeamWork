@@ -48,15 +48,15 @@ public class TaskModel extends RealmObject {
      * files : []
      */
 
-    private String name;
-    private String pid;
     @PrimaryKey
     private String tid;
+    private String name;
+    private String pid;
     private String entry_id;
     private String entry_name;
     private String created_at;
     private String updated_at;
-    private int pos;
+    private double pos;
     /**
      * expire_date :
      * comment_count : 0
@@ -171,11 +171,11 @@ public class TaskModel extends RealmObject {
         this.updated_at = updated_at;
     }
 
-    public int getPos() {
+    public double getPos() {
         return pos;
     }
 
-    public void setPos(int pos) {
+    public void setPos(double pos) {
         this.pos = pos;
     }
 

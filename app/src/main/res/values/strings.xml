@@ -32,4 +32,7 @@
     <string name="text_menu_team">团队</string>
     <string name="text_menu_project">项目</string>
     <string name="text_menu_calendar">日程</string>
+    <string name="text_team_refresh">团队列表已更新</string>
+    <string name="text_project_refreshing">正在更新项目 ...</string>
+    <string name="text_team_no_project">该团队暂时没有项目</string>
 </resources>

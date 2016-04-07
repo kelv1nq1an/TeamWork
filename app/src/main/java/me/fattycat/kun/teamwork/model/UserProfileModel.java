@@ -17,7 +17,10 @@
  */
 package me.fattycat.kun.teamwork.model;
 
-public class UserProfileModel {
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
+public class UserProfileModel extends RealmObject {
 
     /**
      * uid : 679efdf3960d45a0b8679693098135ff
@@ -29,7 +32,7 @@ public class UserProfileModel {
      * status : 3
      * online : 0
      */
-
+    @PrimaryKey
     private String uid;
     private String name;
     private String display_name;

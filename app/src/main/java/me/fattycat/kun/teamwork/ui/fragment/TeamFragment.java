@@ -37,7 +37,7 @@ import me.fattycat.kun.teamwork.R;
 import me.fattycat.kun.teamwork.TWAccessToken;
 import me.fattycat.kun.teamwork.TWApi;
 import me.fattycat.kun.teamwork.TWRetrofit;
-import me.fattycat.kun.teamwork.model.UserTeamListModel;
+import me.fattycat.kun.teamwork.model.TeamModel;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -52,7 +52,7 @@ public class TeamFragment extends BaseFragment {
     @Bind(R.id.fragment_team_member)
     RecyclerView mTeamMemberRecyclerView;
 
-    private List<UserTeamListModel> mUserTeamList = new ArrayList<>();
+    private List<TeamModel> mUserTeamList = new ArrayList<>();
     private ArrayAdapter<String> mUserTeamListAdapter;
 
     @Override
@@ -86,11 +86,11 @@ public class TeamFragment extends BaseFragment {
 
     private void getUserTeamList() {
         TWApi.UserTeamListService userTeamListService = TWRetrofit.createService(TWApi.UserTeamListService.class, TWAccessToken.getAccessToken());
-        Call<List<UserTeamListModel>> userTeamsListCall = userTeamListService.getUserTeams();
+        Call<List<TeamModel>> userTeamsListCall = userTeamListService.getUserTeams();
 
-        userTeamsListCall.enqueue(new Callback<List<UserTeamListModel>>() {
+        userTeamsListCall.enqueue(new Callback<List<TeamModel>>() {
             @Override
-            public void onResponse(Call<List<UserTeamListModel>> call, Response<List<UserTeamListModel>> response) {
+            public void onResponse(Call<List<TeamModel>> call, Response<List<TeamModel>> response) {
                 if (response.body() != null) {
                     mUserTeamList = response.body();
 
@@ -99,7 +99,7 @@ public class TeamFragment extends BaseFragment {
             }
 
             @Override
-            public void onFailure(Call<List<UserTeamListModel>> call, Throwable t) {
+            public void onFailure(Call<List<TeamModel>> call, Throwable t) {
                 // FIXME: 16/3/22 user team list on failure
             }
         });
@@ -107,7 +107,7 @@ public class TeamFragment extends BaseFragment {
 
     private void updateSpinnerData() {
         mUserTeamListAdapter.clear();
-        for (UserTeamListModel model : mUserTeamList) {
+        for (TeamModel model : mUserTeamList) {
             mUserTeamListAdapter.add(model.getName());
         }
         mUserTeamListAdapter.notifyDataSetChanged();

@@ -18,7 +18,6 @@
 package me.fattycat.kun.teamwork.ui.activity;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -51,6 +50,8 @@ import java.util.Map;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.realm.Realm;
+import io.realm.RealmResults;
 import me.fattycat.kun.teamwork.R;
 import me.fattycat.kun.teamwork.TWAccessToken;
 import me.fattycat.kun.teamwork.TWApi;
@@ -59,9 +60,9 @@ import me.fattycat.kun.teamwork.TWSettings;
 import me.fattycat.kun.teamwork.event.TaskListEvent;
 import me.fattycat.kun.teamwork.model.EntryModel;
 import me.fattycat.kun.teamwork.model.TaskModel;
+import me.fattycat.kun.teamwork.model.TeamModel;
 import me.fattycat.kun.teamwork.model.TeamProjectModel;
 import me.fattycat.kun.teamwork.model.UserProfileModel;
-import me.fattycat.kun.teamwork.model.UserTeamListModel;
 import me.fattycat.kun.teamwork.ui.adapter.MainTabPagerAdapter;
 import me.fattycat.kun.teamwork.ui.fragment.EntryFragment;
 import me.fattycat.kun.teamwork.util.LogUtils;
@@ -91,16 +92,13 @@ public class MainActivity extends BaseActivity
     private TextView mTvProfileDesc;
 
     private Context mContext;
-    private SharedPreferences mSPUserProfile;
-    private List<UserTeamListModel> mUserTeamList = new ArrayList<>();
+    private List<TeamModel> mUserTeamList = new ArrayList<>();
     private List<TeamProjectModel> mTeamProjectList = new ArrayList<>();
-    private List<TaskModel> mTaskModelAll = new ArrayList<>();
-    private List<EntryModel> mEntryList = new ArrayList<>();
-    private Map<String, String> mTitlesMap = new HashMap<>();
     private Map<String, List<TaskModel>> mTaskListMap = new HashMap<>();
     private ArrayAdapter<String> mUserTeamAdapter;
     private MainTabPagerAdapter mMainTabPagerAdapter = new MainTabPagerAdapter(getSupportFragmentManager());
     private String mPid;
+    private Realm mRealm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,13 +107,25 @@ public class MainActivity extends BaseActivity
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        mSPUserProfile = getSharedPreferences(getString(R.string.text_sp_user_profile_key), MODE_PRIVATE);
         setSupportActionBar(mToolbar);
+        mRealm = Realm.getDefaultInstance();
 
         initView();
         loadUserProfile();
         getUserProfile();
+
+        mUserTeamList = mRealm.where(TeamModel.class).findAll();
+        if (mUserTeamList.size() > 0) {
+            updateSpinnerData();
+            LogUtils.i(TAG, "Realm load user team list success.");
+        }
         getUserTeamList();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mRealm.close();
     }
 
     private void initView() {
@@ -171,17 +181,18 @@ public class MainActivity extends BaseActivity
 
     private void loadUserProfile() {
         // FIXME: 16/3/17 add default avatar
-        if (mSPUserProfile.getString(getString(R.string.text_sp_user_profile_uid), null) != null) {
-            Picasso.with(mContext).load(Uri.parse(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_avatar), null))).into(mProfileImage);
-            mTvProfileName.setText(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_display_name), getString(R.string.text_profile_name)));
-            mTvProfileDesc.setText(mSPUserProfile.getString(getString(R.string.text_sp_user_profile_desc), getString(R.string.text_profile_description)));
+        RealmResults<UserProfileModel> userProfileResult = mRealm.where(UserProfileModel.class).findAll();
+        if (userProfileResult != null && userProfileResult.size() > 0) {
+            Picasso.with(mContext).load(Uri.parse(userProfileResult.last().getAvatar())).into(mProfileImage);
+            mTvProfileName.setText(userProfileResult.last().getDisplay_name());
+            mTvProfileDesc.setText(userProfileResult.last().getDesc());
         }
         LogUtils.i(TAG, "loadUserProfile");
     }
 
     private void updateSpinnerData() {
         mUserTeamAdapter.clear();
-        for (UserTeamListModel model : mUserTeamList) {
+        for (TeamModel model : mUserTeamList) {
             mUserTeamAdapter.add(model.getName());
         }
         mUserTeamAdapter.notifyDataSetChanged();
@@ -201,28 +212,18 @@ public class MainActivity extends BaseActivity
             @Override
             public void onResponse(Call<UserProfileModel> call, Response<UserProfileModel> response) {
                 if (response.body() != null) {
-                    String uid = response.body().getUid();
-                    String avatar = response.body().getAvatar();
-                    String name = response.body().getName();
-                    String displayName = response.body().getDisplay_name();
-                    String desc = response.body().getDesc();
-                    String email = response.body().getEmail();
-                    int online = response.body().getOnline();
 
-                    SharedPreferences.Editor editor = mSPUserProfile.edit();
-                    editor.clear()
-                            .putString(getString(R.string.text_sp_user_profile_uid), uid)
-                            .putString(getString(R.string.text_sp_user_profile_avatar), avatar)
-                            .putString(getString(R.string.text_sp_user_profile_name), name)
-                            .putString(getString(R.string.text_sp_user_profile_display_name), displayName)
-                            .putString(getString(R.string.text_sp_user_profile_desc), desc)
-                            .putString(getString(R.string.text_sp_user_profile_email), email)
-                            .putInt(getString(R.string.text_sp_user_profile_online), online)
-                            .apply();
+                    final UserProfileModel userProfile = response.body();
+                    mRealm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            mRealm.copyToRealmOrUpdate(userProfile);
+                        }
+                    });
 
                     loadUserProfile();
 
-                    LogUtils.i(TAG, "getUserProfile | onResponse | name = " + name);
+                    LogUtils.i(TAG, "getUserProfile | onResponse");
 
                 } else {
                     // FIXME: 16/3/17 null on get user profile
@@ -238,16 +239,26 @@ public class MainActivity extends BaseActivity
 
     private void getUserTeamList() {
         TWApi.UserTeamListService userTeamListService = TWRetrofit.createService(TWApi.UserTeamListService.class, TWAccessToken.getAccessToken());
-        Call<List<UserTeamListModel>> userTeamsListCall = userTeamListService.getUserTeams();
+        Call<List<TeamModel>> userTeamsListCall = userTeamListService.getUserTeams();
 
-        userTeamsListCall.enqueue(new Callback<List<UserTeamListModel>>() {
+        userTeamsListCall.enqueue(new Callback<List<TeamModel>>() {
             @Override
-            public void onResponse(Call<List<UserTeamListModel>> call, Response<List<UserTeamListModel>> response) {
+            public void onResponse(Call<List<TeamModel>> call, Response<List<TeamModel>> response) {
                 if (response.body() != null) {
+
+                    final List<TeamModel> list = response.body();
+                    mRealm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            mRealm.copyToRealmOrUpdate(list);
+                        }
+                    });
+
                     mUserTeamList = response.body();
 
                     updateSpinnerData();
                     getTeamProjects(mUserTeamList.get(0).getTeam_id());
+                    Snackbar.make(mFab, R.string.text_team_refresh, Snackbar.LENGTH_SHORT).show();
 
                     LogUtils.i(TAG, "getUserTeamList | onResponse ");
 
@@ -255,7 +266,7 @@ public class MainActivity extends BaseActivity
             }
 
             @Override
-            public void onFailure(Call<List<UserTeamListModel>> call, Throwable t) {
+            public void onFailure(Call<List<TeamModel>> call, Throwable t) {
                 // FIXME: 16/3/22 user team list on failure
             }
         });
@@ -272,7 +283,14 @@ public class MainActivity extends BaseActivity
                 if (response.body() != null) {
                     mTeamProjectList = response.body();
 
-                    TWSettings.sProjectList = mTeamProjectList;
+                    final List<TeamProjectModel> teamProject = response.body();
+                    mRealm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            mRealm.copyToRealmOrUpdate(teamProject);
+                        }
+                    });
+
                     initTeamProjectMenu(false);
 
                     LogUtils.i(TAG, "getTeamProjects | onResponse");
@@ -294,17 +312,23 @@ public class MainActivity extends BaseActivity
             @Override
             public void onResponse(Call<List<EntryModel>> call, Response<List<EntryModel>> response) {
                 if (response.body() != null) {
-                    mEntryList = response.body();
+
+                    final List<EntryModel> entryModel = response.body();
+                    mRealm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            // FIXME: 16/4/7 group
+                            mRealm.clear(EntryModel.class);
+                            mRealm.copyToRealmOrUpdate(entryModel);
+                        }
+                    });
 
                     List<String> entryTitles = new ArrayList<>();
-                    int entryNum = 0;
                     for (EntryModel entry : response.body()) {
-                        mTitlesMap.put(entry.getEntry_id(), entry.getName());
                         entryTitles.add(entry.getName());
-                        entryNum += 1;
                     }
 
-                    initProjectEntryFragments(entryNum, entryTitles);
+                    initProjectEntryFragments(entryTitles);
                 }
 
             }
@@ -326,9 +350,17 @@ public class MainActivity extends BaseActivity
             @Override
             public void onResponse(Call<List<TaskModel>> call, Response<List<TaskModel>> response) {
                 if (response.body() != null) {
-                    mTaskModelAll = response.body();
+
+                    final List<TaskModel> taskModels = response.body();
+                    mRealm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            mRealm.copyToRealmOrUpdate(taskModels);
+                        }
+                    });
+
                     for (TaskModel task : response.body()) {
-                        List<TaskModel> taskList = mTaskListMap.get(task.getEntry_name());
+                        List<TaskModel> taskList = mTaskListMap.get(task.getEntry_id());
                         if (taskList != null) {
                             taskList.add(task);
                         }
@@ -357,7 +389,7 @@ public class MainActivity extends BaseActivity
                 String.format("%s %s", getString(R.string.text_menu_project), TWSettings.sTeamList.get(TWSettings.sSelectedTeamPos).getName()));
 
         if (isClear) {
-            projectMenu.add(Menu.NONE, Menu.NONE, Menu.NONE, "项目加载中 ...")
+            projectMenu.add(Menu.NONE, Menu.NONE, Menu.NONE, R.string.text_project_refreshing)
                     .setCheckable(true)
                     .setIcon(android.R.color.transparent);
             return;
@@ -374,14 +406,14 @@ public class MainActivity extends BaseActivity
             projectMenu.add(Menu.NONE,
                     Menu.NONE,
                     Menu.NONE,
-                    "该团队暂时没有项目")
+                    R.string.text_team_no_project)
                     .setCheckable(true)
                     .setIcon(android.R.color.transparent);
         }
 
     }
 
-    private void initProjectEntryFragments(int entryNum, List<String> titles) {
+    private void initProjectEntryFragments(List<String> titles) {
         mTabLayout.setVisibility(View.VISIBLE);
 
         mMainTabPagerAdapter.clear();
@@ -389,10 +421,12 @@ public class MainActivity extends BaseActivity
         TeamProjectModel project = mTeamProjectList.get(TWSettings.sSelectedProjectPos);
         mPid = project.getPid();
 
-        for (int i = 0; i < entryNum; i++) {
-            // FIXME: 16/4/6 entry id
-            mMainTabPagerAdapter.addFragment(EntryFragment.newInstance(mPid, titles.get(i)), titles.get(i));
-            mTaskListMap.put(titles.get(i), new ArrayList<TaskModel>());
+        List<EntryModel> entryModelRealmResults = mRealm.where(EntryModel.class).findAll();
+        for (EntryModel entryModel : entryModelRealmResults) {
+            String entryId = entryModel.getEntry_id();
+            String entryName = entryModel.getName();
+            mMainTabPagerAdapter.addFragment(EntryFragment.newInstance(mPid, entryId), entryName);
+            mTaskListMap.put(entryId, new ArrayList<TaskModel>());
         }
 
         getTaskList();

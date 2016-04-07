@@ -34,6 +34,10 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import io.realm.Realm;
+import io.realm.RealmMigration;
+import io.realm.RealmResults;
+import io.realm.Sort;
 import me.fattycat.kun.teamwork.R;
 import me.fattycat.kun.teamwork.TWAccessToken;
 import me.fattycat.kun.teamwork.TWApi;
@@ -49,7 +53,7 @@ import retrofit2.Response;
 public class EntryFragment extends BaseFragment {
     private static final String TAG = "TW_EntryFragment";
     private static final String ARG_PROJECT_ID = "pid";
-    private static final String ARG_ENTRY_NAME = "entry_name";
+    private static final String ARG_ENTRY_ID = "entry_id";
 
     @Bind(R.id.fragment_entry_list)
     RecyclerView mEntryRecyclerView;
@@ -57,8 +61,9 @@ public class EntryFragment extends BaseFragment {
     MultiStateView mMultiStateView;
 
     private String mPid;
-    private String mEntryName;
+    private String mEntryId;
     private EntryRvAdapter mEntryRvAdapter = new EntryRvAdapter();
+    private Realm mRealm;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -66,9 +71,9 @@ public class EntryFragment extends BaseFragment {
 
         if (getArguments() != null) {
             mPid = getArguments().getString(ARG_PROJECT_ID);
-            mEntryName = getArguments().getString(ARG_ENTRY_NAME);
+            mEntryId = getArguments().getString(ARG_ENTRY_ID);
         }
-
+        mRealm = Realm.getDefaultInstance();
         EventBus.getDefault().register(this);
     }
 
@@ -99,7 +104,7 @@ public class EntryFragment extends BaseFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
+        mRealm.close();
         EventBus.getDefault().unregister(this);
     }
 
@@ -113,9 +118,17 @@ public class EntryFragment extends BaseFragment {
             public void onResponse(Call<List<TaskModel>> call, Response<List<TaskModel>> response) {
                 if (response.body() != null) {
 
+                    final List<TaskModel> taskModels = response.body();
+                    mRealm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            mRealm.copyToRealm(taskModels);
+                        }
+                    });
+
                     LogUtils.i(TAG, "getTaskList | onResponse");
-                    mMultiStateView.setViewState(MultiStateView.VIEW_STATE_CONTENT);
-                    mEntryRvAdapter.setData(response.body());
+
+                    updateData();
                 }
             }
 
@@ -126,11 +139,19 @@ public class EntryFragment extends BaseFragment {
         });
     }
 
-    public static EntryFragment newInstance(String pid, String entryName) {
+    private void updateData() {
+        mMultiStateView.setViewState(MultiStateView.VIEW_STATE_CONTENT);
+
+        RealmResults<TaskModel> results = mRealm.where(TaskModel.class).equalTo("entry_id", mEntryId).findAll();
+        results.sort("pos", Sort.ASCENDING);
+        mEntryRvAdapter.setData(results);
+    }
+
+    public static EntryFragment newInstance(String pid, String entryId) {
         EntryFragment entryFragment = new EntryFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PROJECT_ID, pid);
-        args.putString(ARG_ENTRY_NAME, entryName);
+        args.putString(ARG_ENTRY_ID, entryId);
         entryFragment.setArguments(args);
         return entryFragment;
     }
@@ -146,10 +167,9 @@ public class EntryFragment extends BaseFragment {
 
         if (event.taskModelListMap != null
                 && event.taskModelListMap.size() != 0
-                && event.taskModelListMap.get(mEntryName) != null
-                && event.taskModelListMap.get(mEntryName).size() != 0) {
-            mMultiStateView.setViewState(MultiStateView.VIEW_STATE_CONTENT);
-            mEntryRvAdapter.setData(event.taskModelListMap.get(mEntryName));
+                && event.taskModelListMap.get(mEntryId) != null
+                && event.taskModelListMap.get(mEntryId).size() != 0) {
+            updateData();
             return;
         }
         mMultiStateView.setViewState(MultiStateView.VIEW_STATE_EMPTY);

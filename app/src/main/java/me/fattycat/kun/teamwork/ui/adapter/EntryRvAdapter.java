@@ -18,6 +18,7 @@
 package me.fattycat.kun.teamwork.ui.adapter;
 
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,23 +29,19 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import io.realm.RealmResults;
 import me.fattycat.kun.teamwork.R;
 import me.fattycat.kun.teamwork.model.TaskModel;
 import me.fattycat.kun.teamwork.model.TodosEntity;
 
 public class EntryRvAdapter extends RecyclerView.Adapter<EntryRvAdapter.EntryViewHolder> {
     private static final String TAG = "TW_EntryRvAdapter";
+    private static final String TODO_DOT = "· ";
 
-    private List<TaskModel> mTaskList = new ArrayList<>();
+    private RealmResults<TaskModel> mRealmResults;
 
-    public void addTask(TaskModel task) {
-        mTaskList.add(task);
-        notifyDataSetChanged();
-    }
-
-    public void setData(List<TaskModel> data) {
-        mTaskList.clear();
-        mTaskList.addAll(data);
+    public void setData(RealmResults<TaskModel> data) {
+        mRealmResults = data;
     }
 
     @Override
@@ -56,21 +53,23 @@ public class EntryRvAdapter extends RecyclerView.Adapter<EntryRvAdapter.EntryVie
 
     @Override
     public void onBindViewHolder(EntryViewHolder holder, int position) {
-        if (mTaskList.size() < 0) {
+        if (mRealmResults.size() < 0) {
             return;
         }
 
-        TaskModel task = mTaskList.get(position);
+        TaskModel task = mRealmResults.get(position);
 
         String taskName = task.getName();
         String taskDesc = task.getDesc();
+        String taskTodos = "";
 
         int todoNum = task.getTodos().size();
         int completed = task.getCompleted();
         int todoCheckNum = 0;
-        for (TodosEntity todo : task.getTodos()) {
-            if (todo.getChecked() == 1)
+        for (TodosEntity entity : task.getTodos()) {
+            if (entity.getChecked() == 1)
                 todoCheckNum += 1;
+            taskTodos += TODO_DOT + entity.getName() + "\n";
         }
 
        /* if (todoNum == 0) {
@@ -84,18 +83,27 @@ public class EntryRvAdapter extends RecyclerView.Adapter<EntryRvAdapter.EntryVie
             holder.taskProgress.setProgress(todoNum);
             holder.taskProgress.setSecondaryProgress(todoCheckNum);
         }*/
+        if (TextUtils.isEmpty(taskTodos)) {
+            holder.taskTodos.setVisibility(View.GONE);
+        } else {
+            holder.taskTodos.setVisibility(View.VISIBLE);
+        }
+
         holder.taskName.setText(taskName);
+        holder.taskTodos.setText(taskTodos);
         holder.taskDesc.setText(taskDesc);
     }
 
     @Override
     public int getItemCount() {
-        return mTaskList.size();
+        return mRealmResults == null ? 0 : mRealmResults.size();
     }
 
     public class EntryViewHolder extends RecyclerView.ViewHolder {
         @Bind(R.id.entry_list_item_task_name)
         TextView taskName;
+        @Bind(R.id.entry_list_item_task_todos)
+        TextView taskTodos;
         @Bind(R.id.entry_list_item_task_desc)
         TextView taskDesc;
 
