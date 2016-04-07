@@ -103,6 +103,7 @@ public class EntryFragment extends BaseFragment {
     public void onDestroy() {
         super.onDestroy();
         mRealm.close();
+        LogUtils.i(TAG, "onDestroy | " + me);
         EventBus.getDefault().unregister(this);
     }
 

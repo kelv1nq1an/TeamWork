@@ -20,16 +20,23 @@ package me.fattycat.kun.teamwork.ui.adapter;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainTabPagerAdapter extends FragmentPagerAdapter {
+    private FragmentManager mFragmentManager;
+
     private final List<Fragment> mFragments = new ArrayList<>();
     private final List<String> mTitles = new ArrayList<>();
 
     public MainTabPagerAdapter(FragmentManager fm) {
         super(fm);
+        mFragmentManager = fm;
     }
 
     public void addFragment(Fragment fragment, String title) {
@@ -38,6 +45,11 @@ public class MainTabPagerAdapter extends FragmentPagerAdapter {
     }
 
     public void clear() {
+        FragmentTransaction transaction = mFragmentManager.beginTransaction();
+        for (Fragment fragment : mFragments) {
+            transaction.remove(fragment);
+        }
+        transaction.commit();
         mFragments.clear();
         mTitles.clear();
     }

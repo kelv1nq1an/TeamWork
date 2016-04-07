@@ -96,7 +96,7 @@ public class MainActivity extends BaseActivity
     private List<TeamProjectModel> mTeamProjectList = new ArrayList<>();
     private Map<String, List<TaskModel>> mTaskListMap = new HashMap<>();
     private ArrayAdapter<String> mUserTeamAdapter;
-    private MainTabPagerAdapter mMainTabPagerAdapter = new MainTabPagerAdapter(getSupportFragmentManager());
+    private MainTabPagerAdapter mMainTabPagerAdapter;
     private String mPid;
     private Realm mRealm;
 
@@ -109,7 +109,7 @@ public class MainActivity extends BaseActivity
 
         setSupportActionBar(mToolbar);
         mRealm = Realm.getDefaultInstance();
-
+        mMainTabPagerAdapter = new MainTabPagerAdapter(getSupportFragmentManager());
         initView();
         loadUserProfile();
         getUserProfile();
@@ -420,17 +420,15 @@ public class MainActivity extends BaseActivity
         for (EntryModel entryModel : entryModelRealmResults) {
             String entryId = entryModel.getEntry_id();
             String entryName = entryModel.getName();
-            mMainTabPagerAdapter.addFragment(EntryFragment.newInstance(entryId), entryName);
-            mMainTabPagerAdapter.notifyDataSetChanged();
+            EntryFragment fragment = EntryFragment.newInstance(entryId);
+            mMainTabPagerAdapter.addFragment(fragment, entryName);
             mTaskListMap.put(entryId, new ArrayList<TaskModel>());
         }
 
-        getTaskList();
-
-        mViewPager.setOffscreenPageLimit(3);
         mViewPager.setAdapter(mMainTabPagerAdapter);
         mTabLayout.setupWithViewPager(mViewPager);
 
+        getTaskList();
     }
 
     @Override
