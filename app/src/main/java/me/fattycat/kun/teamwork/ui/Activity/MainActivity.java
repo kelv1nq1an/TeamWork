@@ -425,6 +425,7 @@ public class MainActivity extends BaseActivity
             mTaskListMap.put(entryId, new ArrayList<TaskModel>());
         }
 
+        mViewPager.setOffscreenPageLimit(entryModelRealmResults.size());
         mViewPager.setAdapter(mMainTabPagerAdapter);
         mTabLayout.setupWithViewPager(mViewPager);
 
