@@ -38,6 +38,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.github.clans.fab.FloatingActionMenu;
 import com.squareup.picasso.Picasso;
 
 import org.greenrobot.eventbus.EventBus;
@@ -86,6 +87,12 @@ public class MainActivity extends BaseActivity
     TabLayout mTabLayout;
     @Bind(R.id.container)
     ViewPager mViewPager;
+    @Bind(R.id.fab_button_refresh)
+    com.github.clans.fab.FloatingActionButton mFabButtonRefresh;
+    @Bind(R.id.fab_button_add_task)
+    com.github.clans.fab.FloatingActionButton mFabButtonAddTask;
+    @Bind(R.id.fab_menu)
+    FloatingActionMenu mFabMenu;
 
     private CircleImageView mProfileImage;
     private TextView mTvProfileName;

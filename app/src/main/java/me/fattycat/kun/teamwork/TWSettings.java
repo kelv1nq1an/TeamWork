@@ -23,7 +23,7 @@ import me.fattycat.kun.teamwork.model.TeamProjectModel;
 import me.fattycat.kun.teamwork.model.TeamModel;
 
 public class TWSettings {
-    public static int sSelectedTeamPos;
+    public static int sSelectedTeamPos = -1;
     public static List<TeamModel> sTeamList;
 
     public static int sSelectedProjectPos;
