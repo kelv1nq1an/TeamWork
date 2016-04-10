@@ -21,16 +21,18 @@ import java.util.List;
 
 import me.fattycat.kun.teamwork.model.AccessTokenBody;
 import me.fattycat.kun.teamwork.model.AccessTokenModel;
+import me.fattycat.kun.teamwork.model.CompleteModel;
 import me.fattycat.kun.teamwork.model.EntryModel;
 import me.fattycat.kun.teamwork.model.ProjectModel;
 import me.fattycat.kun.teamwork.model.TaskModel;
+import me.fattycat.kun.teamwork.model.TeamModel;
 import me.fattycat.kun.teamwork.model.TeamProjectModel;
 import me.fattycat.kun.teamwork.model.UserProfileModel;
-import me.fattycat.kun.teamwork.model.TeamModel;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -39,7 +41,7 @@ public class TWApi {
     public static final String BASE_URL_COMMON = "https://api.worktile.com/";
     public static final String BASE_URL_SCHEME = "v1/";
 
-    public static String OAUTHURL = TWApi.BASE_URL_OAUTH
+    public static String OAUTH_URL = TWApi.BASE_URL_OAUTH
             + "authorize?client_id=" + TWSecret.CLIENT_ID
             + "&redirect_uri=" + TWSecret.REDIRECT_URI;
 
@@ -77,4 +79,37 @@ public class TWApi {
         @GET(BASE_URL_SCHEME + "tasks")
         Call<List<TaskModel>> getTaskList(@Query("pid") String pid);
     }
+
+    public interface TaskCompleteService {
+        @PUT(BASE_URL_SCHEME + "tasks/{taskId}/complete")
+        Call<CompleteModel> putTaskComplete(@Path("taskId") String taskId,
+                                            @Query("tid") String tid,
+                                            @Query("pid") String pid);
+    }
+
+    public interface TaskUnCompleteService {
+        @PUT(BASE_URL_SCHEME + "tasks/{taskId}/uncomplete")
+        Call<CompleteModel> putTaskUnComplete(@Path("taskId") String taskId,
+                                              @Query("tid") String tid,
+                                              @Query("pid") String pid);
+    }
+
+    public interface TodoCompleteService {
+        @PUT(BASE_URL_SCHEME + "tasks/{tid}/todos/{todo_id}/checked")
+        Call<CompleteModel> putTodoComplete(@Path("tid") String taskId,
+                                            @Path("todo_id") String todoId,
+                                            @Query("tid") String taskId2,
+                                            @Query("todo_id") String todoId2,
+                                            @Query("pid") String pid);
+    }
+
+    public interface TodoUnCompleteService {
+        @PUT(BASE_URL_SCHEME + "tasks/{tid}/todos/{todo_id}/unchecked")
+        Call<CompleteModel> putTodoUnComplete(@Path("tid") String taskId,
+                                              @Path("todo_id") String todoId,
+                                              @Query("tid") String taskId2,
+                                              @Query("todo_id") String todoId2,
+                                              @Query("pid") String pid);
+    }
+
 }

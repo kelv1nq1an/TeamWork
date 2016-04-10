@@ -27,18 +27,22 @@ import android.view.ViewGroup;
 
 import com.kennyc.view.MultiStateView;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import io.realm.Realm;
+import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import me.fattycat.kun.teamwork.R;
+import me.fattycat.kun.teamwork.event.TaskDataChangeEvent;
 import me.fattycat.kun.teamwork.event.TaskListEvent;
 import me.fattycat.kun.teamwork.model.TaskModel;
 import me.fattycat.kun.teamwork.ui.adapter.EntryRvAdapter;
+import me.fattycat.kun.teamwork.util.LogUtils;
 
 public class EntryFragment extends BaseFragment {
     private static final String TAG = "TW_EntryFragment";
@@ -50,8 +54,9 @@ public class EntryFragment extends BaseFragment {
     MultiStateView mMultiStateView;
 
     private String mEntryId;
-    private EntryRvAdapter mEntryRvAdapter = new EntryRvAdapter();
+    private EntryRvAdapter mEntryRvAdapter;
     private Realm mRealm;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,8 +66,8 @@ public class EntryFragment extends BaseFragment {
             mEntryId = getArguments().getString(ARG_ENTRY_ID);
         }
 
+        mEntryRvAdapter = new EntryRvAdapter();
         mRealm = Realm.getDefaultInstance();
-        EventBus.getDefault().register(this);
     }
 
     @Nullable
@@ -85,12 +90,10 @@ public class EntryFragment extends BaseFragment {
     public void onDestroy() {
         super.onDestroy();
         mRealm.close();
-        EventBus.getDefault().unregister(this);
     }
 
     private void updateData() {
         mMultiStateView.setViewState(MultiStateView.VIEW_STATE_CONTENT);
-
         RealmResults<TaskModel> results = mRealm.where(TaskModel.class).equalTo("entry_id", mEntryId).findAll();
         results.sort("pos", Sort.ASCENDING);
         mEntryRvAdapter.setData(results);
@@ -119,7 +122,11 @@ public class EntryFragment extends BaseFragment {
             return;
         }
         mMultiStateView.setViewState(MultiStateView.VIEW_STATE_EMPTY);
+    }
 
+    @Subscribe
+    public void onDataChange(TaskDataChangeEvent event) {
+        updateData();
     }
 
 }

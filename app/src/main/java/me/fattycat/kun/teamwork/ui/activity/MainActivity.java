@@ -20,7 +20,6 @@ package me.fattycat.kun.teamwork.ui.activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -29,6 +28,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
@@ -42,6 +42,7 @@ import com.github.clans.fab.FloatingActionMenu;
 import com.squareup.picasso.Picasso;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,11 +59,17 @@ import me.fattycat.kun.teamwork.TWAccessToken;
 import me.fattycat.kun.teamwork.TWApi;
 import me.fattycat.kun.teamwork.TWRetrofit;
 import me.fattycat.kun.teamwork.TWSettings;
+import me.fattycat.kun.teamwork.event.TaskCompleteEvent;
+import me.fattycat.kun.teamwork.event.TaskDataChangeEvent;
 import me.fattycat.kun.teamwork.event.TaskListEvent;
+import me.fattycat.kun.teamwork.event.TodoCompleteEvent;
+import me.fattycat.kun.teamwork.model.CompleteModel;
 import me.fattycat.kun.teamwork.model.EntryModel;
 import me.fattycat.kun.teamwork.model.TaskModel;
 import me.fattycat.kun.teamwork.model.TeamModel;
 import me.fattycat.kun.teamwork.model.TeamProjectModel;
+import me.fattycat.kun.teamwork.model.TodoWrapper;
+import me.fattycat.kun.teamwork.model.TodosEntity;
 import me.fattycat.kun.teamwork.model.UserProfileModel;
 import me.fattycat.kun.teamwork.ui.adapter.MainTabPagerAdapter;
 import me.fattycat.kun.teamwork.ui.fragment.EntryFragment;
@@ -74,11 +81,14 @@ import retrofit2.Response;
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = "TW_MainActivity";
+    private static final int EVENT_TYPE_TASK = 0;
+    private static final int EVENT_TYPE_TODO = 1;
+    private static final int UNCOMPLETE = 0;
+    private static final int COMPLETE = 1;
+
 
     @Bind(R.id.toolbar)
     Toolbar mToolbar;
-    @Bind(R.id.fab)
-    FloatingActionButton mFab;
     @Bind(R.id.nav_view)
     NavigationView mNavView;
     @Bind(R.id.drawer_layout)
@@ -136,13 +146,6 @@ public class MainActivity extends BaseActivity
     }
 
     private void initView() {
-        mFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -184,10 +187,17 @@ public class MainActivity extends BaseActivity
 
         mTabLayout.setVisibility(View.GONE);
         mDrawerLayout.openDrawer(GravityCompat.START);
+        mFabMenu.setClosedOnTouchOutside(true);
+        mFabButtonRefresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getProjectEntries(TWSettings.sSelectedProjectPos);
+                mFabMenu.close(true);
+            }
+        });
     }
 
     private void loadUserProfile() {
-        // FIXME: 16/3/17 add default avatar
         RealmResults<UserProfileModel> userProfileResult = mRealm.where(UserProfileModel.class).findAll();
         if (userProfileResult != null && userProfileResult.size() > 0) {
             Picasso.with(mContext).load(Uri.parse(userProfileResult.last().getAvatar())).into(mProfileImage);
@@ -265,7 +275,7 @@ public class MainActivity extends BaseActivity
 
                     updateSpinnerData();
                     getTeamProjects(mUserTeamList.get(0).getTeam_id());
-                    Snackbar.make(mFab, R.string.text_team_refresh, Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(mFabMenu, R.string.text_team_refresh, Snackbar.LENGTH_SHORT).show();
 
                     LogUtils.i(TAG, "getUserTeamList | onResponse ");
 
@@ -437,6 +447,164 @@ public class MainActivity extends BaseActivity
         mTabLayout.setupWithViewPager(mViewPager);
 
         getTaskList();
+    }
+
+    private void showCompleteChangeSnackBar(String msg, final int eventType, final String tid, final String pid, final TodoWrapper todoWrapper, final boolean isComplete) {
+        Snackbar.make(mFabMenu, msg, Snackbar.LENGTH_LONG)
+                .setAction("撤销", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        switch (eventType) {
+                            case EVENT_TYPE_TASK:
+                                onTaskComplete(new TaskCompleteEvent(tid, pid, !isComplete));
+                                break;
+                            case EVENT_TYPE_TODO:
+                                onTodoComplete(new TodoCompleteEvent(todoWrapper, !isComplete));
+                                break;
+                        }
+                    }
+                })
+                .show();
+    }
+
+    @Subscribe
+    public void onTaskComplete(TaskCompleteEvent event) {
+        final String tid = event.tid;
+        final String pid = event.pid;
+        final boolean isComplete = event.isComplete;
+
+        if (isComplete) {
+            TWApi.TaskCompleteService taskCompleteService = TWRetrofit.createService(TWApi.TaskCompleteService.class);
+            Call<CompleteModel> taskCompleteCall = taskCompleteService.putTaskComplete(tid, tid, pid);
+            taskCompleteCall.enqueue(new Callback<CompleteModel>() {
+                @Override
+                public void onResponse(Call<CompleteModel> call, Response<CompleteModel> response) {
+                    if (response.body() != null) {
+                        if (TextUtils.equals("true", response.body().getSuccess())) {
+                            showCompleteChangeSnackBar("任务标记完成", EVENT_TYPE_TASK, tid, pid, null, true);
+                            taskCompleteInfoToRealm(tid, COMPLETE);
+                            EventBus.getDefault().post(new TaskDataChangeEvent(true));
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<CompleteModel> call, Throwable t) {
+                    EventBus.getDefault().post(new TaskDataChangeEvent(false));
+                }
+            });
+        } else {
+            TWApi.TaskUnCompleteService taskUnCompleteService = TWRetrofit.createService(TWApi.TaskUnCompleteService.class);
+            Call<CompleteModel> taskUnCompleteCall = taskUnCompleteService.putTaskUnComplete(tid, tid, pid);
+            taskUnCompleteCall.enqueue(new Callback<CompleteModel>() {
+                @Override
+                public void onResponse(Call<CompleteModel> call, Response<CompleteModel> response) {
+                    if (response.body() != null) {
+                        if (TextUtils.equals("true", response.body().getSuccess())) {
+                            showCompleteChangeSnackBar("任务标记未完成", EVENT_TYPE_TASK, tid, pid, null, false);
+                            taskCompleteInfoToRealm(tid, UNCOMPLETE);
+                            EventBus.getDefault().post(new TaskDataChangeEvent(true));
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<CompleteModel> call, Throwable t) {
+                    EventBus.getDefault().post(new TaskDataChangeEvent(false));
+                }
+            });
+        }
+    }
+
+    @Subscribe
+    public void onTodoComplete(final TodoCompleteEvent event) {
+        final String todoId = event.todoWrapper.todoId;
+        final String taskId = event.todoWrapper.taskId;
+        final String projectId = event.todoWrapper.projectId;
+        if (event.isChecked) {
+            TWApi.TodoCompleteService todoCompleteService = TWRetrofit.createService(TWApi.TodoCompleteService.class);
+            Call<CompleteModel> todoCompleteCall = todoCompleteService.putTodoComplete(taskId, todoId, taskId, todoId, projectId);
+
+            todoCompleteCall.enqueue(new Callback<CompleteModel>() {
+                @Override
+                public void onResponse(Call<CompleteModel> call, Response<CompleteModel> response) {
+                    if (response.body() != null) {
+                        if (TextUtils.equals("true", response.body().getSuccess())) {
+                            showCompleteChangeSnackBar("检查项标记完成", EVENT_TYPE_TODO, null, null, event.todoWrapper, true);
+                            todoCompleteInfoToRealm(taskId, projectId, todoId, COMPLETE);
+                            EventBus.getDefault().post(new TaskDataChangeEvent(true));
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<CompleteModel> call, Throwable t) {
+                    EventBus.getDefault().post(new TaskDataChangeEvent(false));
+                }
+            });
+        } else {
+            TWApi.TodoUnCompleteService todoUnCompleteService = TWRetrofit.createService(TWApi.TodoUnCompleteService.class);
+            Call<CompleteModel> todoUnCompleteCall = todoUnCompleteService.putTodoUnComplete(taskId, todoId, taskId, todoId, projectId);
+            todoUnCompleteCall.enqueue(new Callback<CompleteModel>() {
+                @Override
+                public void onResponse(Call<CompleteModel> call, Response<CompleteModel> response) {
+                    if (response.body() != null) {
+                        if (TextUtils.equals("true", response.body().getSuccess())) {
+                            showCompleteChangeSnackBar("检查项标记未完成", EVENT_TYPE_TODO, null, null, event.todoWrapper, false);
+                            todoCompleteInfoToRealm(taskId, projectId, todoId, UNCOMPLETE);
+                            EventBus.getDefault().post(new TaskDataChangeEvent(true));
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<CompleteModel> call, Throwable t) {
+                    EventBus.getDefault().post(new TaskDataChangeEvent(false));
+                }
+            });
+        }
+    }
+
+    private void taskCompleteInfoToRealm(final String taskId, final int isComplete) {
+        TaskModel taskModel = mRealm.where(TaskModel.class)
+                .equalTo("tid", taskId)
+                .findFirst();
+        LogUtils.i(TAG, "taskmodel | " + taskModel.getName() + " | " + taskModel.getCompleted() + " | isComplete = " + isComplete);
+
+        mRealm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                TaskModel task = mRealm.where(TaskModel.class)
+                        .equalTo("tid", taskId)
+                        .findFirst();
+                task.setCompleted(isComplete);
+            }
+        });
+
+        TaskModel taskModel2 = mRealm.where(TaskModel.class)
+                .equalTo("tid", taskId)
+                .findFirst();
+        LogUtils.i(TAG, "taskmodel | " + taskModel2.getName() + " | " + taskModel2.getCompleted());
+    }
+
+    private void todoCompleteInfoToRealm(final String taskId, final String projectId, final String todoId, final int isComplete) {
+        mRealm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                TaskModel task = mRealm.where(TaskModel.class)
+                        .equalTo("tid", taskId)
+                        .equalTo("pid", projectId)
+                        .findFirst();
+                int index = 0;
+                for (TodosEntity todosEntity : task.getTodos()) {
+                    if (TextUtils.equals(todosEntity.getTodo_id(), todoId)) {
+                        index = task.getTodos().indexOf(todosEntity);
+                        break;
+                    }
+                }
+                task.getTodos().get(index).setChecked(isComplete);
+            }
+        });
     }
 
     @Override

@@ -1,6 +1,6 @@
 /*
  * TeamWork
- * Copyright (C) 2015  FattycatR
+ * Copyright (C) 2016  FattycatR
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,16 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program;  if not, see <http://www.gnu.org/licenses/>.
  */
-package me.fattycat.kun.teamwork;
+package me.fattycat.kun.teamwork.event;
 
-import java.util.List;
+import me.fattycat.kun.teamwork.model.TodoWrapper;
 
-import me.fattycat.kun.teamwork.model.TeamModel;
+public class TodoCompleteEvent {
+    public TodoWrapper todoWrapper;
+    public boolean isChecked;
 
-public class TWSettings {
-    public static int sSelectedTeamPos = -1;
-    public static List<TeamModel> sTeamList;
-
-    public static int sSelectedProjectPos;
-
+    public TodoCompleteEvent(TodoWrapper todoWrapper, boolean isChecked) {
+        this.todoWrapper = todoWrapper;
+        this.isChecked = isChecked;
+    }
 }

@@ -17,8 +17,6 @@
  */
 package me.fattycat.kun.teamwork.model;
 
-import java.util.List;
-
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 

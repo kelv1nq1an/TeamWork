@@ -83,7 +83,7 @@ public class LoginActivity extends BaseActivity {
 
     @OnClick(R.id.login)
     public void login() {
-        Intent loginIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(TWApi.OAUTHURL));
+        Intent loginIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(TWApi.OAUTH_URL));
         startActivity(loginIntent);
     }
 
@@ -92,7 +92,7 @@ public class LoginActivity extends BaseActivity {
     public void requestAuth() {
         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
         builder.setToolbarColor(ContextCompat.getColor(mContext, R.color.colorPrimary));
-        builder.build().launchUrl(this, Uri.parse(TWApi.OAUTHURL));
+        builder.build().launchUrl(this, Uri.parse(TWApi.OAUTH_URL));
     }
 
     @Subscribe

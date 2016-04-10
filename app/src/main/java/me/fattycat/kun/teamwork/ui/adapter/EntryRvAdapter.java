@@ -22,42 +22,54 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import io.realm.RealmResults;
 import me.fattycat.kun.teamwork.R;
+import me.fattycat.kun.teamwork.event.TaskCompleteEvent;
+import me.fattycat.kun.teamwork.event.TodoCompleteEvent;
 import me.fattycat.kun.teamwork.model.TaskModel;
+import me.fattycat.kun.teamwork.model.TodoWrapper;
 import me.fattycat.kun.teamwork.model.TodosEntity;
+import me.fattycat.kun.teamwork.util.LogUtils;
 
-public class EntryRvAdapter extends RecyclerView.Adapter<EntryRvAdapter.EntryViewHolder> {
+public class EntryRvAdapter extends RecyclerView.Adapter<EntryRvAdapter.EntryViewHolder>
+        implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
     private static final String TAG = "TW_EntryRvAdapter";
     private static final String TODO_DOT = "· ";
 
-    private RealmResults<TaskModel> mRealmResults;
+    private List<TaskModel> mData;
+    private LayoutInflater inflater;
 
     public void setData(RealmResults<TaskModel> data) {
-        mRealmResults = data;
+        mData = data;
+        notifyDataSetChanged();
     }
 
     @Override
     public EntryViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_entry_list_task, parent, false);
+        inflater = LayoutInflater.from(parent.getContext());
+        View view = inflater.inflate(R.layout.item_entry_list_task, parent, false);
         return new EntryViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(EntryViewHolder holder, int position) {
-        if (mRealmResults.size() < 0) {
+        if (mData.size() < 0) {
             return;
         }
 
-        TaskModel task = mRealmResults.get(position);
+        TaskModel task = mData.get(position);
 
         String taskName = task.getName();
         String taskDesc = task.getDesc();
@@ -66,46 +78,88 @@ public class EntryRvAdapter extends RecyclerView.Adapter<EntryRvAdapter.EntryVie
         int todoNum = task.getTodos().size();
         int completed = task.getCompleted();
         int todoCheckNum = 0;
-        for (TodosEntity entity : task.getTodos()) {
-            if (entity.getChecked() == 1)
+
+        holder.taskTodos.removeAllViews();
+        for (TodosEntity todoEntity : task.getTodos()) {
+            taskTodos += TODO_DOT + todoEntity.getName() + "\n";
+            View mTodoView = inflater.inflate(R.layout.item_todo, holder.taskTodos, false);
+            CheckBox todoComplete = (CheckBox) mTodoView.findViewById(R.id.item_todo_check);
+            TextView todoName = (TextView) mTodoView.findViewById(R.id.item_todo_name);
+            if (todoEntity.getChecked() == 1) {
                 todoCheckNum += 1;
-            taskTodos += TODO_DOT + entity.getName() + "\n";
+                todoComplete.setChecked(true);
+            } else {
+                todoComplete.setChecked(false);
+            }
+            todoName.setText(todoEntity.getName());
+            TodoWrapper todoWrapper = new TodoWrapper(todoEntity.getTodo_id(), task.getTid(), task.getPid(), todoEntity.getName());
+            mTodoView.setTag(todoWrapper);
+            todoComplete.setTag(todoWrapper);
+
+            todoComplete.setOnCheckedChangeListener(this);
+            mTodoView.setOnClickListener(this);
+            holder.taskTodos.addView(mTodoView);
         }
 
-       /* if (todoNum == 0) {
-            holder.taskProgress.setProgress(1);
-            if (completed == 0) {
-                holder.taskProgress.setSecondaryProgress(0);
-            } else {
-                holder.taskProgress.setSecondaryProgress(1);
-            }
+        if (task.getCompleted() == 1) {
+            holder.taskComplete.setChecked(true);
         } else {
-            holder.taskProgress.setProgress(todoNum);
-            holder.taskProgress.setSecondaryProgress(todoCheckNum);
-        }*/
-        if (TextUtils.isEmpty(taskTodos)) {
-            holder.taskTodos.setVisibility(View.GONE);
+            holder.taskComplete.setChecked(false);
+        }
+
+        if (TextUtils.isEmpty(taskDesc)) {
+            holder.taskDesc.setVisibility(View.GONE);
         } else {
-            holder.taskTodos.setVisibility(View.VISIBLE);
+            holder.taskDesc.setVisibility(View.VISIBLE);
         }
 
         holder.taskName.setText(taskName);
-        holder.taskTodos.setText(taskTodos);
         holder.taskDesc.setText(taskDesc);
+        holder.taskComplete.setTag(task);
+        holder.taskEdit.setTag(task);
+        holder.taskComplete.setOnCheckedChangeListener(this);
+        holder.taskEdit.setOnClickListener(this);
     }
 
     @Override
     public int getItemCount() {
-        return mRealmResults == null ? 0 : mRealmResults.size();
+        return mData == null ? 0 : mData.size();
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v instanceof Button) {
+
+        } else if (v instanceof LinearLayout) {
+            CheckBox todoCheck = (CheckBox) v.findViewById(R.id.item_todo_check);
+            boolean isChecked = !todoCheck.isChecked();
+            todoCheck.setChecked(isChecked);
+        }
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (buttonView.getTag() instanceof TaskModel) {
+            TaskModel task = (TaskModel) buttonView.getTag();
+            EventBus.getDefault().post(new TaskCompleteEvent(task.getTid(), task.getPid(), isChecked));
+            LogUtils.i(TAG, ((TaskModel) buttonView.getTag()).getName() + " | " + isChecked);
+        } else if (buttonView.getTag() instanceof TodoWrapper) {
+            TodoWrapper todoWrapper = (TodoWrapper) buttonView.getTag();
+            EventBus.getDefault().post(new TodoCompleteEvent(todoWrapper, isChecked));
+        }
     }
 
     public class EntryViewHolder extends RecyclerView.ViewHolder {
         @Bind(R.id.entry_list_item_task_name)
         TextView taskName;
+        @Bind(R.id.entry_list_item_task_check)
+        CheckBox taskComplete;
         @Bind(R.id.entry_list_item_task_todos)
-        TextView taskTodos;
+        LinearLayout taskTodos;
         @Bind(R.id.entry_list_item_task_desc)
         TextView taskDesc;
+        @Bind(R.id.entry_list_item_task_edit)
+        Button taskEdit;
 
         public EntryViewHolder(View itemView) {
             super(itemView);
