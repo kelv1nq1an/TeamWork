@@ -234,6 +234,7 @@ public class MainActivity extends BaseActivity
                     mRealm.executeTransaction(new Realm.Transaction() {
                         @Override
                         public void execute(Realm realm) {
+                            mRealm.clear(UserProfileModel.class);
                             mRealm.copyToRealmOrUpdate(userProfile);
                         }
                     });
@@ -267,6 +268,7 @@ public class MainActivity extends BaseActivity
                     mRealm.executeTransaction(new Realm.Transaction() {
                         @Override
                         public void execute(Realm realm) {
+                            mRealm.clear(TeamModel.class);
                             mRealm.copyToRealmOrUpdate(list);
                         }
                     });
@@ -304,6 +306,7 @@ public class MainActivity extends BaseActivity
                     mRealm.executeTransaction(new Realm.Transaction() {
                         @Override
                         public void execute(Realm realm) {
+                            mRealm.clear(TeamProjectModel.class);
                             mRealm.copyToRealmOrUpdate(teamProject);
                         }
                     });
@@ -367,6 +370,7 @@ public class MainActivity extends BaseActivity
                     mRealm.executeTransaction(new Realm.Transaction() {
                         @Override
                         public void execute(Realm realm) {
+                            mRealm.clear(TaskModel.class);
                             mRealm.copyToRealmOrUpdate(taskModels);
                         }
                     });
