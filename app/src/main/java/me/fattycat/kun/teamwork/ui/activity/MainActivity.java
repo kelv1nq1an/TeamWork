@@ -123,6 +123,7 @@ public class MainActivity extends BaseActivity
         mContext = this;
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        EventBus.getDefault().register(this);
 
         setSupportActionBar(mToolbar);
         mRealm = Realm.getDefaultInstance();
@@ -137,6 +138,12 @@ public class MainActivity extends BaseActivity
             LogUtils.i(TAG, "Realm load user team list success.");
         }
         getUserTeamList();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -643,11 +650,7 @@ public class MainActivity extends BaseActivity
         int id = item.getItemId();
         LogUtils.i(TAG, "navigation drawer item selected | id = " + id);
 
-        if (id == R.id.nav_team) {
-
-        } else if (id == R.id.nav_project) {
-
-        } else if (id == R.id.nav_calendar) {
+        if (id == R.id.nav_calendar) {
 
         } else {
             TWSettings.sSelectedProjectPos = id;

@@ -2,14 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_team"
-            android:icon="@drawable/ic_menu_team"
-            android:title="@string/text_menu_team"/>
-        <item
-            android:id="@+id/nav_project"
-            android:icon="@drawable/ic_menu_project"
-            android:title="@string/text_menu_project"/>
+        <!--<item
+              android:id="@+id/nav_team"
+              android:icon="@drawable/ic_menu_team"
+              android:title="@string/text_menu_team"/>
+          <item
+              android:id="@+id/nav_project"
+              android:icon="@drawable/ic_menu_project"
+              android:title="@string/text_menu_project"/>-->
         <item
             android:id="@+id/nav_calendar"
             android:icon="@drawable/ic_menu_calendar"

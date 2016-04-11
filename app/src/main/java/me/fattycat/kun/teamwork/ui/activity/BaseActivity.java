@@ -50,13 +50,6 @@ public class BaseActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mSPAuthorize = getSharedPreferences(getString(R.string.text_sp_authorize_key), MODE_PRIVATE);
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        EventBus.getDefault().unregister(this);
     }
 
     public void loadAuthorization() {

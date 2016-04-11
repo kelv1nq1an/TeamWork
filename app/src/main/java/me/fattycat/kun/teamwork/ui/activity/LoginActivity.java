@@ -38,6 +38,7 @@ public class LoginActivity extends BaseActivity {
         mContext = this;
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
+        EventBus.getDefault().register(this);
 
         loadAuthorization();
         checkAuthorization();
@@ -45,14 +46,8 @@ public class LoginActivity extends BaseActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
         EventBus.getDefault().unregister(this);
     }
 
@@ -76,15 +71,20 @@ public class LoginActivity extends BaseActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
-        LogUtils.i(TAG, "onNewIntent | not authorized");
+        LogUtils.i(TAG, "onNewIntent");
 
         getAccessToken(intent);
     }
 
     @OnClick(R.id.login)
     public void login() {
-        Intent loginIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(TWApi.OAUTH_URL));
-        startActivity(loginIntent);
+        if (true) {
+            Intent oAuthIntent = new Intent(LoginActivity.this, OAuthWebActivity.class);
+            startActivity(oAuthIntent);
+        } else {
+            Intent loginIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(TWApi.OAUTH_URL));
+            startActivity(loginIntent);
+        }
     }
 
     // Chrome Custom Tabs
