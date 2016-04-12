@@ -18,6 +18,7 @@
 package me.fattycat.kun.teamwork.ui.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -61,6 +62,7 @@ import me.fattycat.kun.teamwork.TWRetrofit;
 import me.fattycat.kun.teamwork.TWSettings;
 import me.fattycat.kun.teamwork.event.TaskCompleteEvent;
 import me.fattycat.kun.teamwork.event.TaskDataChangeEvent;
+import me.fattycat.kun.teamwork.event.TaskDetailEvent;
 import me.fattycat.kun.teamwork.event.TaskListEvent;
 import me.fattycat.kun.teamwork.event.TodoCompleteEvent;
 import me.fattycat.kun.teamwork.model.CompleteModel;
@@ -574,6 +576,13 @@ public class MainActivity extends BaseActivity
                 }
             });
         }
+    }
+
+    @Subscribe
+    public void editTask(TaskDetailEvent event) {
+        Intent intent = new Intent(MainActivity.this, TaskDetailActivity.class);
+        intent.putExtra(TaskDetailActivity.EXTRA_TASK_ID, event.taskId);
+        startActivity(intent);
     }
 
     private void taskCompleteInfoToRealm(final String taskId, final int isComplete) {

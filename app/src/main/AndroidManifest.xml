@@ -42,8 +42,13 @@
             android:theme="@style/AppTheme"/>
         <activity
             android:name=".ui.activity.OAuthWebActivity"
-            android:label="@string/title_oauth"
+            android:label="@string/title_activity_oauth"
             android:theme="@style/AppTheme"/>
+        <activity
+            android:name=".ui.activity.TaskDetailActivity"
+            android:label="@string/title_activity_task_detail"
+            android:theme="@style/AppTheme">
+        </activity>
     </application>
 
 </manifest>

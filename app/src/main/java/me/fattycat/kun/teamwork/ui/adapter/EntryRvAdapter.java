@@ -37,6 +37,7 @@ import butterknife.ButterKnife;
 import io.realm.RealmResults;
 import me.fattycat.kun.teamwork.R;
 import me.fattycat.kun.teamwork.event.TaskCompleteEvent;
+import me.fattycat.kun.teamwork.event.TaskDetailEvent;
 import me.fattycat.kun.teamwork.event.TodoCompleteEvent;
 import me.fattycat.kun.teamwork.model.TaskModel;
 import me.fattycat.kun.teamwork.model.TodoWrapper;
@@ -46,7 +47,6 @@ import me.fattycat.kun.teamwork.util.LogUtils;
 public class EntryRvAdapter extends RecyclerView.Adapter<EntryRvAdapter.EntryViewHolder>
         implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
     private static final String TAG = "TW_EntryRvAdapter";
-    private static final String TODO_DOT = "· ";
 
     private List<TaskModel> mData;
     private LayoutInflater inflater;
@@ -73,20 +73,13 @@ public class EntryRvAdapter extends RecyclerView.Adapter<EntryRvAdapter.EntryVie
 
         String taskName = task.getName();
         String taskDesc = task.getDesc();
-        String taskTodos = "";
-
-        int todoNum = task.getTodos().size();
-        int completed = task.getCompleted();
-        int todoCheckNum = 0;
 
         holder.taskTodos.removeAllViews();
         for (TodosEntity todoEntity : task.getTodos()) {
-            taskTodos += TODO_DOT + todoEntity.getName() + "\n";
             View mTodoView = inflater.inflate(R.layout.item_todo, holder.taskTodos, false);
-            CheckBox todoComplete = (CheckBox) mTodoView.findViewById(R.id.item_todo_check);
-            TextView todoName = (TextView) mTodoView.findViewById(R.id.item_todo_name);
+            CheckBox todoComplete = (CheckBox) mTodoView.findViewById(R.id.item_task_detail_todo_check);
+            TextView todoName = (TextView) mTodoView.findViewById(R.id.item_task_detail_todo_name);
             if (todoEntity.getChecked() == 1) {
-                todoCheckNum += 1;
                 todoComplete.setChecked(true);
             } else {
                 todoComplete.setChecked(false);
@@ -116,7 +109,7 @@ public class EntryRvAdapter extends RecyclerView.Adapter<EntryRvAdapter.EntryVie
         holder.taskName.setText(taskName);
         holder.taskDesc.setText(taskDesc);
         holder.taskComplete.setTag(task);
-        holder.taskEdit.setTag(task);
+        holder.taskEdit.setTag(task.getTid());
         holder.taskComplete.setOnCheckedChangeListener(this);
         holder.taskEdit.setOnClickListener(this);
     }
@@ -129,9 +122,10 @@ public class EntryRvAdapter extends RecyclerView.Adapter<EntryRvAdapter.EntryVie
     @Override
     public void onClick(View v) {
         if (v instanceof Button) {
-
+            String taskId = (String) v.getTag();
+            EventBus.getDefault().post(new TaskDetailEvent(taskId));
         } else if (v instanceof LinearLayout) {
-            CheckBox todoCheck = (CheckBox) v.findViewById(R.id.item_todo_check);
+            CheckBox todoCheck = (CheckBox) v.findViewById(R.id.item_task_detail_todo_check);
             boolean isChecked = !todoCheck.isChecked();
             todoCheck.setChecked(isChecked);
         }
