@@ -202,6 +202,7 @@ public class TaskDetailActivity extends BaseActivity {
                     mDetailTodosAdapter.setData(mTodosEntities);
                 }
                 mPdCommitChange.dismiss();
+                EventBus.getDefault().post(new TaskDataChangeEvent(true));
             }
 
             @Override
@@ -278,14 +279,15 @@ public class TaskDetailActivity extends BaseActivity {
         if (mIsEditable) {
             final LinearLayout dialogContainer = (LinearLayout) getLayoutInflater().inflate(R.layout.dialog_add_todo, null);
 
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
             mAdAddTask = alertDialogBuilder.setTitle("检查项内容")
+                    .setView(dialogContainer)
                     .setPositiveButton("添加", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             EditText editText = (EditText) dialogContainer.findViewById(R.id.dialog_add_todo_name);
                             String text = editText.getText().toString();
-                            if (TextUtils.isEmpty(text)) {
+                            if (!TextUtils.isEmpty(text)) {
                                 addNewTodo(text);
                                 mPdCommitChange.show();
                             } else {
@@ -294,7 +296,6 @@ public class TaskDetailActivity extends BaseActivity {
                         }
                     })
                     .setNegativeButton("取消", null)
-                    .setView(R.layout.dialog_add_todo)
                     .create();
             mAdAddTask.show();
         } else {
