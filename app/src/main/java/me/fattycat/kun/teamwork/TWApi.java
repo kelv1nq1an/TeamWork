@@ -23,10 +23,14 @@ import me.fattycat.kun.teamwork.model.AccessTokenBody;
 import me.fattycat.kun.teamwork.model.AccessTokenModel;
 import me.fattycat.kun.teamwork.model.CompleteModel;
 import me.fattycat.kun.teamwork.model.EntryModel;
+import me.fattycat.kun.teamwork.model.NewTodoBody;
+import me.fattycat.kun.teamwork.model.NewTodoModel;
 import me.fattycat.kun.teamwork.model.ProjectModel;
 import me.fattycat.kun.teamwork.model.TaskModel;
+import me.fattycat.kun.teamwork.model.TaskNameChangeBody;
 import me.fattycat.kun.teamwork.model.TeamModel;
 import me.fattycat.kun.teamwork.model.TeamProjectModel;
+import me.fattycat.kun.teamwork.model.TodoChangeModel;
 import me.fattycat.kun.teamwork.model.UserProfileModel;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -98,8 +102,6 @@ public class TWApi {
         @PUT(BASE_URL_SCHEME + "tasks/{tid}/todos/{todo_id}/checked")
         Call<CompleteModel> putTodoComplete(@Path("tid") String taskId,
                                             @Path("todo_id") String todoId,
-                                            @Query("tid") String taskId2,
-                                            @Query("todo_id") String todoId2,
                                             @Query("pid") String pid);
     }
 
@@ -107,9 +109,27 @@ public class TWApi {
         @PUT(BASE_URL_SCHEME + "tasks/{tid}/todos/{todo_id}/unchecked")
         Call<CompleteModel> putTodoUnComplete(@Path("tid") String taskId,
                                               @Path("todo_id") String todoId,
-                                              @Query("tid") String taskId2,
-                                              @Query("todo_id") String todoId2,
                                               @Query("pid") String pid);
     }
 
+    public interface TaskNameChangeService {
+        @PUT(BASE_URL_SCHEME + "tasks/{tid}")
+        Call<CompleteModel> putTaskNameChange(@Path("tid") String tid,
+                                              @Query("pid") String pid,
+                                              @Body TaskNameChangeBody data);
+    }
+
+    public interface TodoChangeService {
+        @PUT(BASE_URL_SCHEME + "tasks/{tid}/todos/{todo_id}")
+        Call<TodoChangeModel> putTodoChange(@Path("tid") String taskId,
+                                            @Path("todo_id") String todoId,
+                                            @Query("pid") String pid);
+    }
+
+    public interface AddNewTodoService {
+        @POST(BASE_URL_SCHEME + "tasks/{tid}/todo")
+        Call<NewTodoModel> addNewTodo(@Path("tid") String taskId,
+                                      @Query("pid") String pid,
+                                      @Body NewTodoBody name);
+    }
 }

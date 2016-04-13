@@ -127,5 +127,4 @@ public class EntryFragment extends BaseFragment {
     public void onDataChange(TaskDataChangeEvent event) {
         updateData();
     }
-
 }

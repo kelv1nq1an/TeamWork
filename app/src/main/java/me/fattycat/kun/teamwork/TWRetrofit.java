@@ -56,10 +56,10 @@ public class TWRetrofit {
             .addConverterFactory(GsonConverterFactory.create(gson));
 
     public static <S> S createService(Class<S> serviceClass) {
-        return createService(serviceClass, null);
+        return createServiceWithToken(serviceClass, null);
     }
 
-    public static <S> S createService(Class<S> serviceClass, final String accessToken) {
+    public static <S> S createServiceWithToken(Class<S> serviceClass, final String accessToken) {
         if (accessToken != null) {
             clientBuilder.addNetworkInterceptor(new Interceptor() {
                 @Override

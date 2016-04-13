@@ -77,8 +77,8 @@ public class EntryRvAdapter extends RecyclerView.Adapter<EntryRvAdapter.EntryVie
         holder.taskTodos.removeAllViews();
         for (TodosEntity todoEntity : task.getTodos()) {
             View mTodoView = inflater.inflate(R.layout.item_todo, holder.taskTodos, false);
-            CheckBox todoComplete = (CheckBox) mTodoView.findViewById(R.id.item_task_detail_todo_check);
-            TextView todoName = (TextView) mTodoView.findViewById(R.id.item_task_detail_todo_name);
+            CheckBox todoComplete = (CheckBox) mTodoView.findViewById(R.id.item_todo_check);
+            TextView todoName = (TextView) mTodoView.findViewById(R.id.item_todo_name);
             if (todoEntity.getChecked() == 1) {
                 todoComplete.setChecked(true);
             } else {
@@ -125,7 +125,7 @@ public class EntryRvAdapter extends RecyclerView.Adapter<EntryRvAdapter.EntryVie
             String taskId = (String) v.getTag();
             EventBus.getDefault().post(new TaskDetailEvent(taskId));
         } else if (v instanceof LinearLayout) {
-            CheckBox todoCheck = (CheckBox) v.findViewById(R.id.item_task_detail_todo_check);
+            CheckBox todoCheck = (CheckBox) v.findViewById(R.id.item_todo_check);
             boolean isChecked = !todoCheck.isChecked();
             todoCheck.setChecked(isChecked);
         }

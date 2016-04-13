@@ -19,42 +19,32 @@
             android:layout_height="?attr/actionBarSize"
             app:popupTheme="@style/AppTheme.PopupOverlay"/>
 
-        <LinearLayout
-            android:id="@+id/task_detail_header_edit"
+        <EditText
+            android:id="@+id/task_detail_name"
+            style="@style/MyEditTextTheme.Light"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/dp_16"
+            android:layout_marginStart="@dimen/dp_72"
+            android:layout_marginTop="@dimen/dp_16"
+            android:background="@null"
+            android:hint="@string/text_task_name"
+            android:imeOptions="actionNext"
+            android:textSize="@dimen/text_size_headline"/>
 
-            <EditText
-                android:id="@+id/task_detail_name"
-                style="@style/MyEditTextTheme.Light"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/dp_16"
-                android:layout_marginStart="@dimen/dp_72"
-                android:enabled="false"
-                android:hint="@string/text_task_name"
-                android:imeOptions="actionNext"
-                android:textSize="@dimen/text_size_headline"/>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"/>
-
-            <EditText
-                android:id="@+id/task_detail_desc"
-                style="@style/MyEditTextTheme.Light"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/dp_16"
-                android:layout_marginEnd="@dimen/dp_16"
-                android:layout_marginStart="@dimen/dp_72"
-                android:enabled="false"
-                android:hint="@string/text_task_desc"
-                android:imeOptions="actionDone"
-                android:textSize="@dimen/text_size_subhead"/>
-        </LinearLayout>
+        <EditText
+            android:id="@+id/task_detail_desc"
+            style="@style/MyEditTextTheme.Light"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/dp_16"
+            android:layout_marginStart="@dimen/dp_72"
+            android:layout_marginTop="@dimen/dp_16"
+            android:background="@null"
+            android:hint="@string/text_task_desc"
+            android:imeOptions="actionDone"
+            android:minHeight="@dimen/dp_24"
+            android:textSize="@dimen/text_size_subhead"/>
 
     </android.support.design.widget.AppBarLayout>
 
@@ -74,7 +64,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_mode_edit_black_24dp"
+        android:src="@drawable/ic_mode_edit_white_24dp"
         android:tint="@color/white"/>
 
 </android.support.design.widget.CoordinatorLayout>

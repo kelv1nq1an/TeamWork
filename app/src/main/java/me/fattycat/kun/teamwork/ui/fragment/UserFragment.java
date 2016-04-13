@@ -121,7 +121,7 @@ public class UserFragment extends BaseFragment {
     }
 
     private void getUserProfile() {
-        TWApi.UserProfileService userProfileService = TWRetrofit.createService(TWApi.UserProfileService.class, TWAccessToken.getAccessToken());
+        TWApi.UserProfileService userProfileService = TWRetrofit.createServiceWithToken(TWApi.UserProfileService.class, TWAccessToken.getAccessToken());
         Call<UserProfileModel> userProfileModelCall = userProfileService.getUserProfile();
 
         userProfileModelCall.enqueue(new Callback<UserProfileModel>() {

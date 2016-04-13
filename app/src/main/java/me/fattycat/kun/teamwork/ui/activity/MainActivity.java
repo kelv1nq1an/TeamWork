@@ -146,16 +146,10 @@ public class MainActivity extends BaseActivity
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
         mRealm.close();
     }
 
     private void initView() {
-
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.addDrawerListener(toggle);
@@ -231,7 +225,7 @@ public class MainActivity extends BaseActivity
     }
 
     private void getUserProfile() {
-        TWApi.UserProfileService userProfileService = TWRetrofit.createService(TWApi.UserProfileService.class, TWAccessToken.getAccessToken());
+        TWApi.UserProfileService userProfileService = TWRetrofit.createServiceWithToken(TWApi.UserProfileService.class, TWAccessToken.getAccessToken());
         Call<UserProfileModel> userProfileModelCall = userProfileService.getUserProfile();
 
         userProfileModelCall.enqueue(new Callback<UserProfileModel>() {
@@ -265,7 +259,7 @@ public class MainActivity extends BaseActivity
     }
 
     private void getUserTeamList() {
-        TWApi.UserTeamListService userTeamListService = TWRetrofit.createService(TWApi.UserTeamListService.class, TWAccessToken.getAccessToken());
+        TWApi.UserTeamListService userTeamListService = TWRetrofit.createServiceWithToken(TWApi.UserTeamListService.class, TWAccessToken.getAccessToken());
         Call<List<TeamModel>> userTeamsListCall = userTeamListService.getUserTeams();
 
         userTeamsListCall.enqueue(new Callback<List<TeamModel>>() {
@@ -303,7 +297,7 @@ public class MainActivity extends BaseActivity
     private void getTeamProjects(String teamId) {
         initTeamProjectMenu(true);
 
-        TWApi.TeamProjectListService teamProjectListService = TWRetrofit.createService(TWApi.TeamProjectListService.class, TWAccessToken.getAccessToken());
+        TWApi.TeamProjectListService teamProjectListService = TWRetrofit.createServiceWithToken(TWApi.TeamProjectListService.class, TWAccessToken.getAccessToken());
         Call<List<TeamProjectModel>> teamProjectsCall = teamProjectListService.getTeamProjectList(teamId);
         teamProjectsCall.enqueue(new Callback<List<TeamProjectModel>>() {
             @Override
@@ -335,7 +329,7 @@ public class MainActivity extends BaseActivity
     }
 
     private void getProjectEntries(int id) {
-        TWApi.ProjectEntryListService projectEntryListService = TWRetrofit.createService(TWApi.ProjectEntryListService.class, TWAccessToken.getAccessToken());
+        TWApi.ProjectEntryListService projectEntryListService = TWRetrofit.createServiceWithToken(TWApi.ProjectEntryListService.class, TWAccessToken.getAccessToken());
         Call<List<EntryModel>> entryListCall = projectEntryListService.getProjectEntryList(mTeamProjectList.get(id).getPid());
         entryListCall.enqueue(new Callback<List<EntryModel>>() {
             @Override
@@ -368,7 +362,7 @@ public class MainActivity extends BaseActivity
     private void getTaskList() {
         LogUtils.i(TAG, "getTaskList");
 
-        TWApi.TaskListService taskListService = TWRetrofit.createService(TWApi.TaskListService.class, TWAccessToken.getAccessToken());
+        TWApi.TaskListService taskListService = TWRetrofit.createServiceWithToken(TWApi.TaskListService.class, TWAccessToken.getAccessToken());
         Call<List<TaskModel>> taskListCall = taskListService.getTaskList(mPid);
         taskListCall.enqueue(new Callback<List<TaskModel>>() {
             @Override
@@ -487,7 +481,7 @@ public class MainActivity extends BaseActivity
         final boolean isComplete = event.isComplete;
 
         if (isComplete) {
-            TWApi.TaskCompleteService taskCompleteService = TWRetrofit.createService(TWApi.TaskCompleteService.class);
+            TWApi.TaskCompleteService taskCompleteService = TWRetrofit.createServiceWithToken(TWApi.TaskCompleteService.class, TWAccessToken.getAccessToken());
             Call<CompleteModel> taskCompleteCall = taskCompleteService.putTaskComplete(tid, tid, pid);
             taskCompleteCall.enqueue(new Callback<CompleteModel>() {
                 @Override
@@ -507,7 +501,7 @@ public class MainActivity extends BaseActivity
                 }
             });
         } else {
-            TWApi.TaskUnCompleteService taskUnCompleteService = TWRetrofit.createService(TWApi.TaskUnCompleteService.class);
+            TWApi.TaskUnCompleteService taskUnCompleteService = TWRetrofit.createServiceWithToken(TWApi.TaskUnCompleteService.class, TWAccessToken.getAccessToken());
             Call<CompleteModel> taskUnCompleteCall = taskUnCompleteService.putTaskUnComplete(tid, tid, pid);
             taskUnCompleteCall.enqueue(new Callback<CompleteModel>() {
                 @Override
@@ -535,8 +529,8 @@ public class MainActivity extends BaseActivity
         final String taskId = event.todoWrapper.taskId;
         final String projectId = event.todoWrapper.projectId;
         if (event.isChecked) {
-            TWApi.TodoCompleteService todoCompleteService = TWRetrofit.createService(TWApi.TodoCompleteService.class);
-            Call<CompleteModel> todoCompleteCall = todoCompleteService.putTodoComplete(taskId, todoId, taskId, todoId, projectId);
+            TWApi.TodoCompleteService todoCompleteService = TWRetrofit.createServiceWithToken(TWApi.TodoCompleteService.class, TWAccessToken.getAccessToken());
+            Call<CompleteModel> todoCompleteCall = todoCompleteService.putTodoComplete(taskId, todoId, projectId);
 
             todoCompleteCall.enqueue(new Callback<CompleteModel>() {
                 @Override
@@ -556,8 +550,8 @@ public class MainActivity extends BaseActivity
                 }
             });
         } else {
-            TWApi.TodoUnCompleteService todoUnCompleteService = TWRetrofit.createService(TWApi.TodoUnCompleteService.class);
-            Call<CompleteModel> todoUnCompleteCall = todoUnCompleteService.putTodoUnComplete(taskId, todoId, taskId, todoId, projectId);
+            TWApi.TodoUnCompleteService todoUnCompleteService = TWRetrofit.createServiceWithToken(TWApi.TodoUnCompleteService.class, TWAccessToken.getAccessToken());
+            Call<CompleteModel> todoUnCompleteCall = todoUnCompleteService.putTodoUnComplete(taskId, todoId, projectId);
             todoUnCompleteCall.enqueue(new Callback<CompleteModel>() {
                 @Override
                 public void onResponse(Call<CompleteModel> call, Response<CompleteModel> response) {
@@ -582,6 +576,7 @@ public class MainActivity extends BaseActivity
     public void editTask(TaskDetailEvent event) {
         Intent intent = new Intent(MainActivity.this, TaskDetailActivity.class);
         intent.putExtra(TaskDetailActivity.EXTRA_TASK_ID, event.taskId);
+        intent.putExtra(TaskDetailActivity.EXTRA_PROJECT_ID, mPid);
         startActivity(intent);
     }
 

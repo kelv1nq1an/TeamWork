@@ -235,7 +235,7 @@ public class TaskModel extends RealmObject {
         this.labels = labels;
     }
 
-    public List<TodosEntity> getTodos() {
+    public RealmList<TodosEntity> getTodos() {
         return todos;
     }
 

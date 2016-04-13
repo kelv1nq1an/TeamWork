@@ -85,7 +85,7 @@ public class TeamFragment extends BaseFragment {
     }
 
     private void getUserTeamList() {
-        TWApi.UserTeamListService userTeamListService = TWRetrofit.createService(TWApi.UserTeamListService.class, TWAccessToken.getAccessToken());
+        TWApi.UserTeamListService userTeamListService = TWRetrofit.createServiceWithToken(TWApi.UserTeamListService.class, TWAccessToken.getAccessToken());
         Call<List<TeamModel>> userTeamsListCall = userTeamListService.getUserTeams();
 
         userTeamsListCall.enqueue(new Callback<List<TeamModel>>() {

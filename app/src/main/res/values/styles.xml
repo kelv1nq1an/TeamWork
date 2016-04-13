@@ -33,7 +33,7 @@
     </style>
 
     <style name="MyEditTextTheme.Dark" parent="@android:style/TextAppearance">
-        <item name="android:singleLine">true</item>
         <item name="backgroundTint">@color/teal_500</item>
+        <item name="android:textColor">@color/black</item>
     </style>
 </resources>
