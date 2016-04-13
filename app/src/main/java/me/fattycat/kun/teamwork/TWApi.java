@@ -31,6 +31,7 @@ import me.fattycat.kun.teamwork.model.TaskNameChangeBody;
 import me.fattycat.kun.teamwork.model.TeamModel;
 import me.fattycat.kun.teamwork.model.TeamProjectModel;
 import me.fattycat.kun.teamwork.model.TodoChangeModel;
+import me.fattycat.kun.teamwork.model.TodoNameChangeBody;
 import me.fattycat.kun.teamwork.model.UserProfileModel;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -123,7 +124,8 @@ public class TWApi {
         @PUT(BASE_URL_SCHEME + "tasks/{tid}/todos/{todo_id}")
         Call<TodoChangeModel> putTodoChange(@Path("tid") String taskId,
                                             @Path("todo_id") String todoId,
-                                            @Query("pid") String pid);
+                                            @Query("pid") String pid,
+                                            @Body TodoNameChangeBody data);
     }
 
     public interface AddNewTodoService {

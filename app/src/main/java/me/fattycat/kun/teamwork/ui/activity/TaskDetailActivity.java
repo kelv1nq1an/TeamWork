@@ -33,6 +33,7 @@ import me.fattycat.kun.teamwork.model.NewTodoModel;
 import me.fattycat.kun.teamwork.model.TaskModel;
 import me.fattycat.kun.teamwork.model.TaskNameChangeBody;
 import me.fattycat.kun.teamwork.model.TodoChangeModel;
+import me.fattycat.kun.teamwork.model.TodoNameChangeBody;
 import me.fattycat.kun.teamwork.model.TodosEntity;
 import me.fattycat.kun.teamwork.ui.adapter.TaskDetailTodosAdapter;
 import me.fattycat.kun.teamwork.util.LogUtils;
@@ -104,7 +105,7 @@ public class TaskDetailActivity extends BaseActivity {
             @Override
             public void onTodoTextChange(final String todoId, final String name) {
                 // TODO: 16/4/13 todoNameChange
-                //putTodoData(todoId, mPid);
+                putTodoData(todoId, mPid, name);
             }
         };
         mDetailTodosAdapter.setTaskDetailListener(taskDetailListener);
@@ -234,9 +235,9 @@ public class TaskDetailActivity extends BaseActivity {
                 }).show();
     }
 
-    private void putTodoData(final String todoId, String pid) {
+    private void putTodoData(final String todoId, String pid, String name) {
         TWApi.TodoChangeService todoChangeService = TWRetrofit.createServiceWithToken(TWApi.TodoChangeService.class, TWAccessToken.getAccessToken());
-        Call<TodoChangeModel> todoChangeCall = todoChangeService.putTodoChange(mTaskId, todoId, pid);
+        Call<TodoChangeModel> todoChangeCall = todoChangeService.putTodoChange(mTaskId, todoId, pid, new TodoNameChangeBody(name));
         todoChangeCall.enqueue(new Callback<TodoChangeModel>() {
             @Override
             public void onResponse(Call<TodoChangeModel> call, final Response<TodoChangeModel> response) {
