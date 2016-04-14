@@ -23,6 +23,7 @@ import me.fattycat.kun.teamwork.model.AccessTokenBody;
 import me.fattycat.kun.teamwork.model.AccessTokenModel;
 import me.fattycat.kun.teamwork.model.CompleteModel;
 import me.fattycat.kun.teamwork.model.EntryModel;
+import me.fattycat.kun.teamwork.model.NewTaskBody;
 import me.fattycat.kun.teamwork.model.NewTodoBody;
 import me.fattycat.kun.teamwork.model.NewTodoModel;
 import me.fattycat.kun.teamwork.model.ProjectModel;
@@ -120,6 +121,12 @@ public class TWApi {
                                               @Body TaskNameChangeBody data);
     }
 
+    public interface AddNewTaskService {
+        @POST(BASE_URL_SCHEME + "task")
+        Call<TaskModel> postNewTask(@Query("pid") String pid,
+                                    @Body NewTaskBody data);
+    }
+
     public interface TodoChangeService {
         @PUT(BASE_URL_SCHEME + "tasks/{tid}/todos/{todo_id}")
         Call<TodoChangeModel> putTodoChange(@Path("tid") String taskId,
@@ -130,8 +137,8 @@ public class TWApi {
 
     public interface AddNewTodoService {
         @POST(BASE_URL_SCHEME + "tasks/{tid}/todo")
-        Call<NewTodoModel> addNewTodo(@Path("tid") String taskId,
-                                      @Query("pid") String pid,
-                                      @Body NewTodoBody name);
+        Call<NewTodoModel> postNewTodo(@Path("tid") String taskId,
+                                       @Query("pid") String pid,
+                                       @Body NewTodoBody name);
     }
 }

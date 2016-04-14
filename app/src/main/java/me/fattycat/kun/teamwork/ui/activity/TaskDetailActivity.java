@@ -180,7 +180,7 @@ public class TaskDetailActivity extends BaseActivity {
 
     private void addNewTodo(String name) {
         TWApi.AddNewTodoService addNewTodoService = TWRetrofit.createServiceWithToken(TWApi.AddNewTodoService.class, TWAccessToken.getAccessToken());
-        Call<NewTodoModel> addNewTodoCall = addNewTodoService.addNewTodo(mTaskId, mPid, new NewTodoBody(name));
+        Call<NewTodoModel> addNewTodoCall = addNewTodoService.postNewTodo(mTaskId, mPid, new NewTodoBody(name));
         addNewTodoCall.enqueue(new Callback<NewTodoModel>() {
             @Override
             public void onResponse(Call<NewTodoModel> call, Response<NewTodoModel> response) {
@@ -278,7 +278,7 @@ public class TaskDetailActivity extends BaseActivity {
     @Subscribe
     public void onTaskAdd(TaskAddEvent event) {
         if (mIsEditable) {
-            final LinearLayout dialogContainer = (LinearLayout) getLayoutInflater().inflate(R.layout.dialog_add_todo, null);
+            final LinearLayout dialogContainer = (LinearLayout) getLayoutInflater().inflate(R.layout.dialog_new_todo, null);
 
             final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
             mAdAddTask = alertDialogBuilder.setTitle("检查项内容")

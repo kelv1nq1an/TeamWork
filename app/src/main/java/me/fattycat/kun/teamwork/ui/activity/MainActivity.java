@@ -17,17 +17,21 @@
  */
 package me.fattycat.kun.teamwork.ui.activity;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -36,9 +40,11 @@ import android.view.SubMenu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.squareup.picasso.Picasso;
 
@@ -67,6 +73,7 @@ import me.fattycat.kun.teamwork.event.TaskListEvent;
 import me.fattycat.kun.teamwork.event.TodoCompleteEvent;
 import me.fattycat.kun.teamwork.model.CompleteModel;
 import me.fattycat.kun.teamwork.model.EntryModel;
+import me.fattycat.kun.teamwork.model.NewTaskBody;
 import me.fattycat.kun.teamwork.model.TaskModel;
 import me.fattycat.kun.teamwork.model.TeamModel;
 import me.fattycat.kun.teamwork.model.TeamProjectModel;
@@ -88,7 +95,6 @@ public class MainActivity extends BaseActivity
     private static final int UNCOMPLETE = 0;
     private static final int COMPLETE = 1;
 
-
     @Bind(R.id.toolbar)
     Toolbar mToolbar;
     @Bind(R.id.nav_view)
@@ -100,21 +106,24 @@ public class MainActivity extends BaseActivity
     @Bind(R.id.container)
     ViewPager mViewPager;
     @Bind(R.id.fab_button_refresh)
-    com.github.clans.fab.FloatingActionButton mFabButtonRefresh;
+    FloatingActionButton mFabButtonRefresh;
     @Bind(R.id.fab_button_add_task)
-    com.github.clans.fab.FloatingActionButton mFabButtonAddTask;
+    FloatingActionButton mFabButtonAddTask;
     @Bind(R.id.fab_menu)
     FloatingActionMenu mFabMenu;
 
     private CircleImageView mProfileImage;
     private TextView mTvProfileName;
     private TextView mTvProfileDesc;
+    private AlertDialog mAdNewTask;
+    private ProgressDialog mProgressDialog;
 
     private Context mContext;
     private List<TeamModel> mUserTeamList = new ArrayList<>();
     private List<TeamProjectModel> mTeamProjectList = new ArrayList<>();
     private Map<String, List<TaskModel>> mTaskListMap = new HashMap<>();
     private ArrayAdapter<String> mUserTeamAdapter;
+    private ArrayAdapter<String> mNewTaskEntryAdapter;
     private MainTabPagerAdapter mMainTabPagerAdapter;
     private String mPid;
     private Realm mRealm;
@@ -155,6 +164,8 @@ public class MainActivity extends BaseActivity
         mDrawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage("数据同步中......");
         mNavView.setNavigationItemSelectedListener(this);
 
         View navHeadView = mNavView.getHeaderView(0);
@@ -180,6 +191,9 @@ public class MainActivity extends BaseActivity
             }
         });
 
+        mNewTaskEntryAdapter = new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_item);
+        mNewTaskEntryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
         // FIXME: 16/3/24 temporary refresh
         mProfileImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -196,6 +210,58 @@ public class MainActivity extends BaseActivity
             public void onClick(View v) {
                 getProjectEntries(TWSettings.sSelectedProjectPos);
                 mFabMenu.close(true);
+            }
+        });
+        mFabButtonAddTask.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final LinearLayout dialogContainer = (LinearLayout) getLayoutInflater().inflate(R.layout.dialog_new_task, null);
+                final Spinner entrySelector = (Spinner) dialogContainer.findViewById(R.id.dialog_new_task_entry_selector);
+                entrySelector.setAdapter(mNewTaskEntryAdapter);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                mAdNewTask = builder.setTitle("创建任务")
+                        .setView(dialogContainer)
+                        .setNegativeButton("取消", null)
+                        .setPositiveButton("提交", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                TextInputEditText etName = (TextInputEditText) dialogContainer.findViewById(R.id.dialog_new_task_name);
+                                TextInputEditText etDesc = (TextInputEditText) dialogContainer.findViewById(R.id.dialog_new_task_desc);
+
+                                String name = etName.getText().toString();
+                                String desc = etDesc.getText().toString();
+                                String entryName = mNewTaskEntryAdapter.getItem(entrySelector.getSelectedItemPosition());
+                                String entryId = mRealm.where(EntryModel.class).equalTo("name", entryName).findFirst().getEntry_id();
+                                if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(entryId)) {
+                                    mProgressDialog.show();
+                                    TWApi.AddNewTaskService newTaskService = TWRetrofit.createServiceWithToken(TWApi.AddNewTaskService.class, TWAccessToken.getAccessToken());
+                                    Call<TaskModel> newTaskCall = newTaskService.postNewTask(mPid, new NewTaskBody(name, entryId, desc));
+                                    newTaskCall.enqueue(new Callback<TaskModel>() {
+                                        @Override
+                                        public void onResponse(Call<TaskModel> call, Response<TaskModel> response) {
+                                            if (response.body() == null) {
+                                                mProgressDialog.dismiss();
+                                                Snackbar.make(mFabMenu, "任务创建失败", Snackbar.LENGTH_LONG).show();
+                                                return;
+                                            }
+
+                                            mProgressDialog.dismiss();
+                                            getProjectEntries(TWSettings.sSelectedProjectPos);
+                                            Snackbar.make(mFabMenu, "任务创建成功", Snackbar.LENGTH_LONG).show();
+                                        }
+
+                                        @Override
+                                        public void onFailure(Call<TaskModel> call, Throwable t) {
+                                            mProgressDialog.dismiss();
+                                            Snackbar.make(mFabMenu, "任务创建失败", Snackbar.LENGTH_LONG).show();
+                                        }
+                                    });
+                                }
+                            }
+                        })
+                        .create();
+                mAdNewTask.show();
             }
         });
     }
@@ -437,6 +503,7 @@ public class MainActivity extends BaseActivity
 
         mMainTabPagerAdapter.clear();
         mTaskListMap.clear();
+        mNewTaskEntryAdapter.clear();
         TeamProjectModel project = mTeamProjectList.get(TWSettings.sSelectedProjectPos);
         mPid = project.getPid();
 
@@ -447,6 +514,8 @@ public class MainActivity extends BaseActivity
             EntryFragment fragment = EntryFragment.newInstance(entryId);
             mMainTabPagerAdapter.addFragment(fragment, entryName);
             mTaskListMap.put(entryId, new ArrayList<TaskModel>());
+
+            mNewTaskEntryAdapter.add(entryName);
         }
 
         mViewPager.setOffscreenPageLimit(entryModelRealmResults.size());
@@ -454,6 +523,8 @@ public class MainActivity extends BaseActivity
         mTabLayout.setupWithViewPager(mViewPager);
 
         getTaskList();
+
+
     }
 
     private void showCompleteChangeSnackBar(String msg, final int eventType, final String tid, final String pid, final TodoWrapper todoWrapper, final boolean isComplete) {
