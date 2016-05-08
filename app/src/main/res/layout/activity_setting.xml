@@ -61,6 +61,46 @@
                 android:textColor="@color/white"
                 android:textSize="@dimen/text_size_title"/>
 
+            <include layout="@layout/layout_divider"/>
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_width="@dimen/dp_72"
+                android:layout_height="@dimen/dp_72"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/person"
+                app:civ_border_color="@color/red_300"
+                app:civ_border_width="2dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/dp_16"
+                android:text="钱坤"
+                android:textSize="@dimen/text_size_headline"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/dp_4"
+                android:text="Android Developer"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/dp_16"
+                android:text="特别鸣谢"
+                android:textSize="@dimen/text_size_headline"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/dp_8"
+                android:text="@string/text_thanks"
+                android:textSize="@dimen/text_size_title"/>
         </LinearLayout>
 
     </android.support.v4.widget.NestedScrollView>

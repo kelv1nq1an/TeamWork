@@ -35,11 +35,12 @@
     <string name="text_menu_project">项目</string>
     <string name="text_menu_calendar">日程</string>
     <string name="text_team_refresh">团队列表已更新</string>
-    <string name="text_project_refreshing">正在更新项目 ...</string>
+    <string name="text_project_refreshing">正在更新项目 …</string>
     <string name="text_team_no_project">该团队暂时没有项目</string>
     <string name="text_task_edit">编辑</string>
     <string name="text_task_name">任务标题</string>
     <string name="text_task_desc">任务描述</string>
     <string name="text_menu_setting">设置</string>
     <string name="text_logout">退出登录</string>
+    <string name="text_thanks">指导老师：侯荣涛</string>
 </resources>

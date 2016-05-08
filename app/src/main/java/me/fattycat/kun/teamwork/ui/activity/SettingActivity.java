@@ -28,6 +28,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import io.realm.Realm;
 import me.fattycat.kun.teamwork.R;
 import me.fattycat.kun.teamwork.event.LogoutEvent;
 
@@ -38,11 +39,15 @@ public class SettingActivity extends BaseActivity {
     @Bind(R.id.setting_logout)
     Button mSettingLogout;
 
+    private Realm mRealm;
+
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
         ButterKnife.bind(this);
+        mRealm = Realm.getDefaultInstance();
 
         setSupportActionBar(mSettingToolbar);
         mSettingToolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
@@ -58,9 +63,17 @@ public class SettingActivity extends BaseActivity {
             public void onClick(View v) {
                 deleteAuthorization();
                 startActivity(new Intent(SettingActivity.this, LoginActivity.class));
+                mRealm.deleteAll();
                 EventBus.getDefault().post(new LogoutEvent());
                 finish();
             }
         });
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mRealm.close();
     }
 }
