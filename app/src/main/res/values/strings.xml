@@ -40,4 +40,6 @@
     <string name="text_task_edit">编辑</string>
     <string name="text_task_name">任务标题</string>
     <string name="text_task_desc">任务描述</string>
+    <string name="text_menu_setting">设置</string>
+    <string name="text_logout">退出登录</string>
 </resources>

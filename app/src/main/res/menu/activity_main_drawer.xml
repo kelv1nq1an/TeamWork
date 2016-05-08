@@ -14,6 +14,10 @@
             android:id="@+id/nav_calendar"
             android:icon="@drawable/ic_menu_calendar"
             android:title="@string/text_menu_calendar"/>
+        <item
+            android:id="@+id/nav_setting"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="@string/text_menu_setting"/>
     </group>
 
 </menu>

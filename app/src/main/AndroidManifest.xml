@@ -47,12 +47,11 @@
         <activity
             android:name=".ui.activity.TaskDetailActivity"
             android:label="@string/title_activity_task_detail"
-            android:theme="@style/AppTheme">
-        </activity><!-- ATTENTION: This was auto-generated to add Google Play services to your project for
-     App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version"/>
+            android:theme="@style/AppTheme"/>
+        <activity
+            android:name=".ui.activity.SettingActivity"
+            android:label="@string/text_menu_setting"
+            android:theme="@style/AppTheme.SettingStyle"/>
     </application>
 
 </manifest>

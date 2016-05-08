@@ -76,6 +76,14 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
+    public void deleteAuthorization() {
+        SharedPreferences.Editor editor = mSPAuthorize.edit();
+        editor.putBoolean(getString(R.string.text_sp_authorize_flag), TWAccessToken.NOTAUTHORIZED)
+                .putString(getString(R.string.text_sp_authorize_access_token), "")
+                .putString(getString(R.string.text_sp_authorize_refresh_token), "")
+                .apply();
+    }
+
     public void getAccessToken(Intent intent) {
         Uri uri = intent.getData();
         if (uri != null && uri.toString().startsWith(TWSecret.REDIRECT_URI)) {

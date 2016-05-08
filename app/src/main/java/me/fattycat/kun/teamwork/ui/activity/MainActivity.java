@@ -66,6 +66,7 @@ import me.fattycat.kun.teamwork.TWAccessToken;
 import me.fattycat.kun.teamwork.TWApi;
 import me.fattycat.kun.teamwork.TWRetrofit;
 import me.fattycat.kun.teamwork.TWSettings;
+import me.fattycat.kun.teamwork.event.LogoutEvent;
 import me.fattycat.kun.teamwork.event.TaskCompleteEvent;
 import me.fattycat.kun.teamwork.event.TaskDataChangeEvent;
 import me.fattycat.kun.teamwork.event.TaskDetailEvent;
@@ -269,7 +270,11 @@ public class MainActivity extends BaseActivity
     private void loadUserProfile() {
         RealmResults<UserProfileModel> userProfileResult = mRealm.where(UserProfileModel.class).findAll();
         if (userProfileResult != null && userProfileResult.size() > 0) {
-            Picasso.with(mContext).load(Uri.parse(userProfileResult.last().getAvatar())).into(mProfileImage);
+            Picasso.with(mContext)
+                    .load(Uri.parse(userProfileResult.last().getAvatar()))
+                    .placeholder(R.drawable.person)
+                    .error(R.drawable.person)
+                    .into(mProfileImage);
             mTvProfileName.setText(userProfileResult.last().getDisplay_name());
             mTvProfileDesc.setText(userProfileResult.last().getDesc());
         }
@@ -523,8 +528,6 @@ public class MainActivity extends BaseActivity
         mTabLayout.setupWithViewPager(mViewPager);
 
         getTaskList();
-
-
     }
 
     private void showCompleteChangeSnackBar(String msg, final int eventType, final String tid, final String pid, final TodoWrapper todoWrapper, final boolean isComplete) {
@@ -651,6 +654,11 @@ public class MainActivity extends BaseActivity
         startActivity(intent);
     }
 
+    @Subscribe
+    public void logout(LogoutEvent event){
+        finish();
+    }
+
     private void taskCompleteInfoToRealm(final String taskId, final int isComplete) {
         TaskModel taskModel = mRealm.where(TaskModel.class)
                 .equalTo("tid", taskId)
@@ -702,23 +710,6 @@ public class MainActivity extends BaseActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -727,6 +718,8 @@ public class MainActivity extends BaseActivity
 
         if (id == R.id.nav_calendar) {
 
+        } else if (id == R.id.nav_setting) {
+            startActivity(new Intent(MainActivity.this, SettingActivity.class));
         } else {
             TWSettings.sSelectedProjectPos = id;
             getProjectEntries(id);
