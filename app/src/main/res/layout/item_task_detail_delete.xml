@@ -6,10 +6,10 @@
 
     <ImageButton
         android:id="@+id/item_task_detail_todo_delete"
-        android:layout_width="match_parent"
+        android:layout_width="@dimen/dp_300"
         android:layout_height="@dimen/dp_54"
         android:layout_gravity="center"
-        android:layout_margin="@dimen/dp_16"
+        android:layout_marginTop="@dimen/dp_16"
         android:background="@color/red_300"
         android:padding="@dimen/dp_8"
         android:src="@drawable/ic_delete_white_24dp"/>

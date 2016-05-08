@@ -47,7 +47,8 @@
         <activity
             android:name=".ui.activity.TaskDetailActivity"
             android:label="@string/title_activity_task_detail"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="stateHidden"/>
         <activity
             android:name=".ui.activity.SettingActivity"
             android:label="@string/text_menu_setting"
