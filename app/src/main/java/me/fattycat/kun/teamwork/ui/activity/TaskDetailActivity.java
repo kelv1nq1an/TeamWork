@@ -21,12 +21,14 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import io.realm.Realm;
 import io.realm.RealmList;
+import io.realm.RealmResults;
 import me.fattycat.kun.teamwork.R;
 import me.fattycat.kun.teamwork.TWAccessToken;
 import me.fattycat.kun.teamwork.TWApi;
 import me.fattycat.kun.teamwork.TWRetrofit;
-import me.fattycat.kun.teamwork.event.TaskAddEvent;
 import me.fattycat.kun.teamwork.event.TaskDataChangeEvent;
+import me.fattycat.kun.teamwork.event.TaskDeleteEvent;
+import me.fattycat.kun.teamwork.event.TodoAddEvent;
 import me.fattycat.kun.teamwork.model.CompleteModel;
 import me.fattycat.kun.teamwork.model.NewTodoBody;
 import me.fattycat.kun.teamwork.model.NewTodoModel;
@@ -57,7 +59,9 @@ public class TaskDetailActivity extends BaseActivity {
     @Bind(R.id.task_detail_todos)
     RecyclerView mRvTaskDetailTodos;
     private ProgressDialog mPdCommitChange;
+    private ProgressDialog mPdDelete;
     private AlertDialog mAdAddTask;
+    private AlertDialog mAdDeleteTask;
     private Realm mRealm;
     private RealmList<TodosEntity> mTodosEntities;
     private TaskDetailTodosAdapter mDetailTodosAdapter;
@@ -131,7 +135,9 @@ public class TaskDetailActivity extends BaseActivity {
         refreshTextState();
 
         mPdCommitChange = new ProgressDialog(this);
-        mPdCommitChange.setMessage("数据保存中......");
+        mPdCommitChange.setMessage("数据保存中 ...");
+        mPdDelete = new ProgressDialog(this);
+        mPdDelete.setMessage("删除中 ...");
     }
 
     private void refreshTextState() {
@@ -209,6 +215,38 @@ public class TaskDetailActivity extends BaseActivity {
             @Override
             public void onFailure(Call<NewTodoModel> call, Throwable t) {
                 mPdCommitChange.dismiss();
+                Snackbar.make(mFab, "数据同步失败，请重新同步", Snackbar.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void deleteTask() {
+        mPdDelete.show();
+        TWApi.TaskDeleteService taskDeleteService = TWRetrofit.createServiceWithToken(TWApi.TaskDeleteService.class, TWAccessToken.getAccessToken());
+        Call<CompleteModel> deleteTaskCall = taskDeleteService.deleteTask(mTaskId, mPid);
+        deleteTaskCall.enqueue(new Callback<CompleteModel>() {
+            @Override
+            public void onResponse(Call<CompleteModel> call, Response<CompleteModel> response) {
+                if (response.body() != null) {
+                    if (TextUtils.equals("true", response.body().getSuccess())) {
+                        mRealm.executeTransaction(new Realm.Transaction() {
+                            @Override
+                            public void execute(Realm realm) {
+                                RealmResults<TaskModel> results = mRealm.where(TaskModel.class).equalTo("tid", mTaskId).findAll();
+                                results.remove(0);
+                            }
+                        });
+                        mPdDelete.dismiss();
+                        EventBus.getDefault().post(new TaskDataChangeEvent(true));
+                        finish();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CompleteModel> call, Throwable t) {
+                mPdDelete.dismiss();
+                Snackbar.make(mFab, "数据同步失败，请重新同步", Snackbar.LENGTH_LONG).show();
             }
         });
     }
@@ -276,7 +314,7 @@ public class TaskDetailActivity extends BaseActivity {
     }
 
     @Subscribe
-    public void onTaskAdd(TaskAddEvent event) {
+    public void onTaskTodoAdd(TodoAddEvent event) {
         if (mIsEditable) {
             final LinearLayout dialogContainer = (LinearLayout) getLayoutInflater().inflate(R.layout.dialog_new_todo, null);
 
@@ -299,6 +337,25 @@ public class TaskDetailActivity extends BaseActivity {
                     .setNegativeButton("取消", null)
                     .create();
             mAdAddTask.show();
+        } else {
+            Snackbar.make(mFab, "请先点击按钮进入编辑模式", Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
+    @Subscribe
+    public void onTaskDelete(TaskDeleteEvent event) {
+        if (mIsEditable) {
+            AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+            mAdDeleteTask = alertBuilder.setTitle("确认删除")
+                    .setPositiveButton("删除", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            deleteTask();
+                        }
+                    })
+                    .setNegativeButton("取消", null)
+                    .create();
+            mAdDeleteTask.show();
         } else {
             Snackbar.make(mFab, "请先点击按钮进入编辑模式", Snackbar.LENGTH_SHORT).show();
         }

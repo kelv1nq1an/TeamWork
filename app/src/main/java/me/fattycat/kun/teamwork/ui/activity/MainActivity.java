@@ -424,7 +424,8 @@ public class MainActivity extends BaseActivity
 
             @Override
             public void onFailure(Call<List<EntryModel>> call, Throwable t) {
-                // FIXME: 16/4/6
+                mProgressDialog.dismiss();
+                Snackbar.make(mFabMenu, "数据同步失败", Snackbar.LENGTH_LONG).show();
             }
         });
 
@@ -463,7 +464,8 @@ public class MainActivity extends BaseActivity
 
             @Override
             public void onFailure(Call<List<TaskModel>> call, Throwable t) {
-                // FIXME: 16/4/6
+                mProgressDialog.dismiss();
+                Snackbar.make(mFabMenu, "数据同步失败", Snackbar.LENGTH_LONG).show();
             }
         });
     }
@@ -527,6 +529,7 @@ public class MainActivity extends BaseActivity
         mViewPager.setAdapter(mMainTabPagerAdapter);
         mTabLayout.setupWithViewPager(mViewPager);
 
+        mProgressDialog.dismiss();
         getTaskList();
     }
 
@@ -655,7 +658,7 @@ public class MainActivity extends BaseActivity
     }
 
     @Subscribe
-    public void logout(LogoutEvent event){
+    public void logout(LogoutEvent event) {
         finish();
     }
 
@@ -722,6 +725,7 @@ public class MainActivity extends BaseActivity
             startActivity(new Intent(MainActivity.this, SettingActivity.class));
         } else {
             TWSettings.sSelectedProjectPos = id;
+            mProgressDialog.show();
             getProjectEntries(id);
         }
 

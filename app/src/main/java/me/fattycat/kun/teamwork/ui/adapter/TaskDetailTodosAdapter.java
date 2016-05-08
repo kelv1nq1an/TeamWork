@@ -35,13 +35,15 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import me.fattycat.kun.teamwork.R;
-import me.fattycat.kun.teamwork.event.TaskAddEvent;
+import me.fattycat.kun.teamwork.event.TodoAddEvent;
+import me.fattycat.kun.teamwork.event.TaskDeleteEvent;
 import me.fattycat.kun.teamwork.model.TodosEntity;
 
 public class TaskDetailTodosAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String TAG = "TW_TaskDetailTodosAdapter";
-    private static final int ITEM_TYPE_NORMAL = 0;
-    private static final int ITEM_TYPE_ADD = 1;
+    private static final int ITEM_TYPE_TODO_NORMAL = 0;
+    private static final int ITEM_TYPE_TODO_ADD = 1;
+    private static final int ITEM_TYPE_TASK_DELETE = 2;
 
     private List<TodosEntity> mData = new ArrayList<>();
     private boolean mIsEditable = false;
@@ -65,12 +67,15 @@ public class TaskDetailTodosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        if (viewType == ITEM_TYPE_NORMAL) {
+        if (viewType == ITEM_TYPE_TODO_NORMAL) {
             View view = inflater.inflate(R.layout.item_task_detail_todo, parent, false);
             return new TaskDetailTodoViewHolder(view);
-        } else {
+        } else if (viewType == ITEM_TYPE_TODO_ADD) {
             View view = inflater.inflate(R.layout.item_task_detail_todo_add, parent, false);
             return new TaskDetailTodoAddViewHolder(view);
+        } else {
+            View view = inflater.inflate(R.layout.item_task_detail_delete, parent, false);
+            return new TaskDetailTodoDeleteViewHolder(view);
         }
     }
 
@@ -120,7 +125,15 @@ public class TaskDetailTodosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             taskDetailTodoAddViewHolder.mTodoAdd.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    EventBus.getDefault().post(new TaskAddEvent());
+                    EventBus.getDefault().post(new TodoAddEvent());
+                }
+            });
+        } else {
+            TaskDetailTodoDeleteViewHolder taskDetailTodoDeleteViewHolder = (TaskDetailTodoDeleteViewHolder) holder;
+            taskDetailTodoDeleteViewHolder.mTodoDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    EventBus.getDefault().post(new TaskDeleteEvent());
                 }
             });
         }
@@ -128,12 +141,18 @@ public class TaskDetailTodosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     @Override
     public int getItemViewType(int position) {
-        return position == mData.size() ? ITEM_TYPE_ADD : ITEM_TYPE_NORMAL;
+        if (position == mData.size() + 1) {
+            return ITEM_TYPE_TASK_DELETE;
+        } else if (position == mData.size()) {
+            return ITEM_TYPE_TODO_ADD;
+        } else {
+            return ITEM_TYPE_TODO_NORMAL;
+        }
     }
 
     @Override
     public int getItemCount() {
-        return mData == null ? 1 : mData.size() + 1;
+        return mData == null ? 2 : mData.size() + 2;
     }
 
     public class TaskDetailTodoViewHolder extends RecyclerView.ViewHolder {
@@ -153,6 +172,16 @@ public class TaskDetailTodosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         ImageButton mTodoAdd;
 
         public TaskDetailTodoAddViewHolder(View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+        }
+    }
+
+    public class TaskDetailTodoDeleteViewHolder extends RecyclerView.ViewHolder {
+        @Bind(R.id.item_task_detail_todo_delete)
+        ImageButton mTodoDelete;
+
+        public TaskDetailTodoDeleteViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }

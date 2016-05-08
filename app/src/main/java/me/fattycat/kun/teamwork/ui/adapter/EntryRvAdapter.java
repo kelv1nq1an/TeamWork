@@ -30,6 +30,7 @@ import android.widget.TextView;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
@@ -48,11 +49,14 @@ public class EntryRvAdapter extends RecyclerView.Adapter<EntryRvAdapter.EntryVie
         implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
     private static final String TAG = "TW_EntryRvAdapter";
 
-    private List<TaskModel> mData;
+    private List<TaskModel> mData = new ArrayList<>();
     private LayoutInflater inflater;
 
     public void setData(RealmResults<TaskModel> data) {
-        mData = data;
+        mData.clear();
+        for (TaskModel model : data) {
+            mData.add(model);
+        }
         notifyDataSetChanged();
     }
 

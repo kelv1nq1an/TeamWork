@@ -17,5 +17,5 @@
  */
 package me.fattycat.kun.teamwork.event;
 
-public class TaskAddEvent {
+public class TodoAddEvent {
 }

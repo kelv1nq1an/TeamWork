@@ -36,6 +36,7 @@ import me.fattycat.kun.teamwork.model.TodoNameChangeBody;
 import me.fattycat.kun.teamwork.model.UserProfileModel;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -98,6 +99,12 @@ public class TWApi {
         Call<CompleteModel> putTaskUnComplete(@Path("taskId") String taskId,
                                               @Query("tid") String tid,
                                               @Query("pid") String pid);
+    }
+
+    public interface TaskDeleteService {
+        @DELETE(BASE_URL_SCHEME + "tasks/{taskId}")
+        Call<CompleteModel> deleteTask(@Path("taskId") String taskId,
+                                       @Query("pid") String pid);
     }
 
     public interface TodoCompleteService {
