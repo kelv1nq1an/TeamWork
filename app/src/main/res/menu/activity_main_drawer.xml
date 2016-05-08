@@ -9,11 +9,11 @@
           <item
               android:id="@+id/nav_project"
               android:icon="@drawable/ic_menu_project"
-              android:title="@string/text_menu_project"/>-->
-        <item
+              android:title="@string/text_menu_project"/>
+          <item
             android:id="@+id/nav_calendar"
             android:icon="@drawable/ic_menu_calendar"
-            android:title="@string/text_menu_calendar"/>
+            android:title="@string/text_menu_calendar"/>-->
         <item
             android:id="@+id/nav_setting"
             android:icon="@drawable/ic_settings_black_24dp"

@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -35,8 +36,9 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import me.fattycat.kun.teamwork.R;
-import me.fattycat.kun.teamwork.event.TodoAddEvent;
 import me.fattycat.kun.teamwork.event.TaskDeleteEvent;
+import me.fattycat.kun.teamwork.event.TodoAddEvent;
+import me.fattycat.kun.teamwork.event.TodoDeleteEvent;
 import me.fattycat.kun.teamwork.model.TodosEntity;
 
 public class TaskDetailTodosAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -51,7 +53,9 @@ public class TaskDetailTodosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     public void setData(List<TodosEntity> data) {
         this.mData.clear();
-        this.mData.addAll(data);
+        for (TodosEntity entity : data) {
+            this.mData.add(entity);
+        }
         notifyDataSetChanged();
     }
 
@@ -86,18 +90,16 @@ public class TaskDetailTodosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 return;
             }
             final TaskDetailTodoViewHolder taskDetailTodoViewHolder = (TaskDetailTodoViewHolder) holder;
-
             final TodosEntity todosEntity = mData.get(position);
-            int endDrawableId;
             if (todosEntity.getChecked() == 1) {
                 taskDetailTodoViewHolder.mTodoCheck.setChecked(true);
             } else {
                 taskDetailTodoViewHolder.mTodoCheck.setChecked(false);
             }
             if (mIsEditable) {
-                endDrawableId = R.drawable.ic_mode_edit_teal_24dp;
+                taskDetailTodoViewHolder.mTodoDelete.setVisibility(View.VISIBLE);
             } else {
-                endDrawableId = 0;
+                taskDetailTodoViewHolder.mTodoDelete.setVisibility(View.GONE);
             }
             taskDetailTodoViewHolder.mTodoCheck.setEnabled(mIsEditable);
             taskDetailTodoViewHolder.mTodoName.setText(todosEntity.getName());
@@ -118,6 +120,12 @@ public class TaskDetailTodosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     if (mTaskDetailListener != null) {
                         mTaskDetailListener.onTodoTextChange(todosEntity.getTodo_id(), taskDetailTodoViewHolder.mTodoName.getText().toString());
                     }
+                }
+            });
+            taskDetailTodoViewHolder.mTodoDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    EventBus.getDefault().post(new TodoDeleteEvent(todosEntity.getTodo_id()));
                 }
             });
         } else if (holder instanceof TaskDetailTodoAddViewHolder) {
@@ -160,6 +168,8 @@ public class TaskDetailTodosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         CheckBox mTodoCheck;
         @Bind(R.id.item_task_detail_todo_name)
         EditText mTodoName;
+        @Bind(R.id.item_task_detail_todo_delete)
+        ImageView mTodoDelete;
 
         public TaskDetailTodoViewHolder(View itemView) {
             super(itemView);

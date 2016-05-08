@@ -72,6 +72,7 @@ import me.fattycat.kun.teamwork.event.TaskDataChangeEvent;
 import me.fattycat.kun.teamwork.event.TaskDetailEvent;
 import me.fattycat.kun.teamwork.event.TaskListEvent;
 import me.fattycat.kun.teamwork.event.TodoCompleteEvent;
+import me.fattycat.kun.teamwork.event.TodoDeleteEvent;
 import me.fattycat.kun.teamwork.model.CompleteModel;
 import me.fattycat.kun.teamwork.model.EntryModel;
 import me.fattycat.kun.teamwork.model.NewTaskBody;
@@ -719,9 +720,7 @@ public class MainActivity extends BaseActivity
         int id = item.getItemId();
         LogUtils.i(TAG, "navigation drawer item selected | id = " + id);
 
-        if (id == R.id.nav_calendar) {
-
-        } else if (id == R.id.nav_setting) {
+        if (id == R.id.nav_setting) {
             startActivity(new Intent(MainActivity.this, SettingActivity.class));
         } else {
             TWSettings.sSelectedProjectPos = id;

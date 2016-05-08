@@ -29,6 +29,7 @@ import me.fattycat.kun.teamwork.TWRetrofit;
 import me.fattycat.kun.teamwork.event.TaskDataChangeEvent;
 import me.fattycat.kun.teamwork.event.TaskDeleteEvent;
 import me.fattycat.kun.teamwork.event.TodoAddEvent;
+import me.fattycat.kun.teamwork.event.TodoDeleteEvent;
 import me.fattycat.kun.teamwork.model.CompleteModel;
 import me.fattycat.kun.teamwork.model.NewTodoBody;
 import me.fattycat.kun.teamwork.model.NewTodoModel;
@@ -220,6 +221,38 @@ public class TaskDetailActivity extends BaseActivity {
         });
     }
 
+    private void deleteTodo(final String todoId) {
+        mPdDelete.show();
+        TWApi.TodoDeleteService todoDeleteService = TWRetrofit.createServiceWithToken(TWApi.TodoDeleteService.class, TWAccessToken.getAccessToken());
+        Call<CompleteModel> todoDeleteCall = todoDeleteService.deleteTodo(mTaskId, todoId, mPid);
+        todoDeleteCall.enqueue(new Callback<CompleteModel>() {
+            @Override
+            public void onResponse(Call<CompleteModel> call, Response<CompleteModel> response) {
+                if (response.body() != null) {
+                    if (TextUtils.equals("true", response.body().getSuccess())) {
+                        mRealm.executeTransaction(new Realm.Transaction() {
+                            @Override
+                            public void execute(Realm realm) {
+                                TodosEntity todosEntity = mTodosEntities.where().equalTo("todo_id", todoId).findFirst();
+                                todosEntity.removeFromRealm();
+                            }
+                        });
+                        mDetailTodosAdapter.setData(mTodosEntities);
+                        EventBus.getDefault().post(new TaskDataChangeEvent(true));
+                    }
+                }
+                mPdDelete.dismiss();
+            }
+
+            @Override
+            public void onFailure(Call<CompleteModel> call, Throwable t) {
+                mPdDelete.dismiss();
+                Snackbar.make(mFab, "数据同步失败，请重新同步", Snackbar.LENGTH_LONG).show();
+            }
+        });
+
+    }
+
     private void deleteTask() {
         mPdDelete.show();
         TWApi.TaskDeleteService taskDeleteService = TWRetrofit.createServiceWithToken(TWApi.TaskDeleteService.class, TWAccessToken.getAccessToken());
@@ -241,6 +274,7 @@ public class TaskDetailActivity extends BaseActivity {
                         finish();
                     }
                 }
+                mPdDelete.dismiss();
             }
 
             @Override
@@ -360,5 +394,28 @@ public class TaskDetailActivity extends BaseActivity {
             Snackbar.make(mFab, "请先点击按钮进入编辑模式", Snackbar.LENGTH_SHORT).show();
         }
     }
+
+
+    @Subscribe
+    public void deleteTodo(TodoDeleteEvent event) {
+        final String todoId = event.todoId;
+        if (mIsEditable) {
+            AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+            mAdDeleteTask = alertBuilder.setTitle("确认删除")
+                    .setPositiveButton("删除", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            deleteTodo(todoId);
+                        }
+                    })
+                    .setNegativeButton("取消", null)
+                    .create();
+            mAdDeleteTask.show();
+        } else {
+            Snackbar.make(mFab, "请先点击按钮进入编辑模式", Snackbar.LENGTH_SHORT).show();
+        }
+
+    }
+
 
 }

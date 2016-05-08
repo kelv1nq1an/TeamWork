@@ -121,6 +121,13 @@ public class TWApi {
                                               @Query("pid") String pid);
     }
 
+    public interface TodoDeleteService {
+        @DELETE(BASE_URL_SCHEME + "tasks/{tid}/todos/{todo_id}")
+        Call<CompleteModel> deleteTodo(@Path("tid") String taskId,
+                                       @Path("todo_id") String todoId,
+                                       @Query("pid") String pid);
+    }
+
     public interface TaskNameChangeService {
         @PUT(BASE_URL_SCHEME + "tasks/{tid}")
         Call<CompleteModel> putTaskNameChange(@Path("tid") String tid,

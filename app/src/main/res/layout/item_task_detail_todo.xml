@@ -17,12 +17,20 @@
     <EditText
         android:id="@+id/item_task_detail_todo_name"
         style="@style/MyEditTextTheme.Dark"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/dp_8"
         android:background="@null"
         android:lineSpacingMultiplier="1.3"
         android:minHeight="@dimen/dp_32"
         tools:text="检查项"/>
+
+    <ImageView
+        android:id="@+id/item_task_detail_todo_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:tint="@color/grey_500"
+        android:src="@drawable/ic_delete_black_24dp"/>
 
 </LinearLayout>
