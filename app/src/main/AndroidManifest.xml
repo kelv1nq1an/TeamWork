@@ -14,7 +14,8 @@
         <activity
             android:name=".ui.activity.LoginActivity"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.WhiteStyle">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -43,7 +44,7 @@
         <activity
             android:name=".ui.activity.OAuthWebActivity"
             android:label="@string/title_activity_oauth"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme.WhiteStyle"/>
         <activity
             android:name=".ui.activity.TaskDetailActivity"
             android:label="@string/title_activity_task_detail"
@@ -52,7 +53,7 @@
         <activity
             android:name=".ui.activity.SettingActivity"
             android:label="@string/text_menu_setting"
-            android:theme="@style/AppTheme.SettingStyle"/>
+            android:theme="@style/AppTheme.WhiteStyle"/>
     </application>
 
 </manifest>

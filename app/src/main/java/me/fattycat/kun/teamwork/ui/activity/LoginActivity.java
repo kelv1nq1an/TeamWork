@@ -54,15 +54,12 @@ public class LoginActivity extends BaseActivity {
     private void checkAuthorization() {
         if (TWAccessToken.sIsAuthorized) {
             mBtnLogin.setVisibility(View.GONE);
-
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
-
             LogUtils.i(TAG, "checkAuthorization | authorized");
         } else {
             mBtnLogin.setVisibility(View.VISIBLE);
-
             LogUtils.i(TAG, "checkAuthorization | not authorized");
         }
     }
@@ -70,21 +67,17 @@ public class LoginActivity extends BaseActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-
         LogUtils.i(TAG, "onNewIntent");
-
         getAccessToken(intent);
     }
 
     @OnClick(R.id.login)
     public void login() {
-        if (true) {
+
             Intent oAuthIntent = new Intent(LoginActivity.this, OAuthWebActivity.class);
             startActivity(oAuthIntent);
-        } else {
-            Intent loginIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(TWApi.OAUTH_URL));
-            startActivity(loginIntent);
-        }
+            /*Intent loginIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(TWApi.OAUTH_URL));
+            startActivity(loginIntent);*/
     }
 
     // Chrome Custom Tabs

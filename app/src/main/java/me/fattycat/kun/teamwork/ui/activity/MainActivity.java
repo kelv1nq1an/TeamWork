@@ -72,7 +72,6 @@ import me.fattycat.kun.teamwork.event.TaskDataChangeEvent;
 import me.fattycat.kun.teamwork.event.TaskDetailEvent;
 import me.fattycat.kun.teamwork.event.TaskListEvent;
 import me.fattycat.kun.teamwork.event.TodoCompleteEvent;
-import me.fattycat.kun.teamwork.event.TodoDeleteEvent;
 import me.fattycat.kun.teamwork.model.CompleteModel;
 import me.fattycat.kun.teamwork.model.EntryModel;
 import me.fattycat.kun.teamwork.model.NewTaskBody;
@@ -483,7 +482,8 @@ public class MainActivity extends BaseActivity
 
         if (isClear) {
             projectMenu.add(Menu.NONE, Menu.NONE, Menu.NONE, R.string.text_project_refreshing)
-                    .setCheckable(true)
+                    .setCheckable(false)
+                    .setEnabled(false)
                     .setIcon(android.R.color.transparent);
             return;
         }
@@ -500,7 +500,8 @@ public class MainActivity extends BaseActivity
                     Menu.NONE,
                     Menu.NONE,
                     R.string.text_team_no_project)
-                    .setCheckable(true)
+                    .setCheckable(false)
+                    .setEnabled(false)
                     .setIcon(android.R.color.transparent);
         }
 

@@ -204,7 +204,7 @@ public class TaskDetailActivity extends BaseActivity {
                     mRealm.executeTransaction(new Realm.Transaction() {
                         @Override
                         public void execute(Realm realm) {
-                            mTask.getTodos().add(pos, todosEntity);
+                            mTask.getTodos().add(todosEntity);
                         }
                     });
                     mDetailTodosAdapter.setData(mTodosEntities);
@@ -380,7 +380,7 @@ public class TaskDetailActivity extends BaseActivity {
     public void onTaskDelete(TaskDeleteEvent event) {
         if (mIsEditable) {
             AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-            mAdDeleteTask = alertBuilder.setTitle("确认删除")
+            mAdDeleteTask = alertBuilder.setTitle("确认删除该任务及其所有内容")
                     .setPositiveButton("删除", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -401,7 +401,7 @@ public class TaskDetailActivity extends BaseActivity {
         final String todoId = event.todoId;
         if (mIsEditable) {
             AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-            mAdDeleteTask = alertBuilder.setTitle("确认删除")
+            mAdDeleteTask = alertBuilder.setTitle("确认删除该检查项")
                     .setPositiveButton("删除", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
