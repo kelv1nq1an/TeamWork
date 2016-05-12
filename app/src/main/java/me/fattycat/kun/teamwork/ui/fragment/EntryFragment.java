@@ -37,6 +37,7 @@ import io.realm.RealmResults;
 import io.realm.Sort;
 import me.fattycat.kun.teamwork.R;
 import me.fattycat.kun.teamwork.event.TaskDataChangeEvent;
+import me.fattycat.kun.teamwork.event.TaskDeleteEvent;
 import me.fattycat.kun.teamwork.event.TaskListEvent;
 import me.fattycat.kun.teamwork.model.TaskModel;
 import me.fattycat.kun.teamwork.ui.adapter.EntryRvAdapter;
@@ -126,5 +127,12 @@ public class EntryFragment extends BaseFragment {
     @Subscribe
     public void onDataChange(TaskDataChangeEvent event) {
         updateData();
+    }
+
+
+
+    @Subscribe
+    public void completeDeleteTask(TaskDeleteEvent event){
+
     }
 }

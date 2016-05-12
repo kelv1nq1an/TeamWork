@@ -17,6 +17,7 @@
  */
 package me.fattycat.kun.teamwork.ui.activity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -85,6 +86,9 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     public void getAccessToken(Intent intent) {
+        final ProgressDialog mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage("登陆中......");
+        mProgressDialog.show();
         Uri uri = intent.getData();
         if (uri != null && uri.toString().startsWith(TWSecret.REDIRECT_URI)) {
             String code = uri.getQueryParameter("code");
@@ -115,18 +119,20 @@ public class BaseActivity extends AppCompatActivity {
 
                             } else {
                                 // FIXME: 16/3/17
-                                ToastUtils.showShort("error");
+                                ToastUtils.showShort("授权失败");
                             }
                         } else {
                             // FIXME: 16/3/17
-                            ToastUtils.showShort("null");
+                            ToastUtils.showShort("授权失败");
                         }
-
+                        mProgressDialog.dismiss();
                     }
 
                     @Override
                     public void onFailure(Call<AccessTokenModel> call, Throwable t) {
                         EventBus.getDefault().post(new AuthorizeEvent(false));
+                        mProgressDialog.dismiss();
+                        ToastUtils.showShort("授权失败");
 
                         LogUtils.i(TAG, "getAccessToken | onFailure");
 

@@ -19,9 +19,13 @@ package me.fattycat.kun.teamwork.ui.activity;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.webkit.CookieManager;
+import android.webkit.ValueCallback;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -54,8 +58,24 @@ public class OAuthWebActivity extends BaseActivity {
         loadWeb();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        CookieManager cookieManager = CookieManager.getInstance();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            cookieManager.removeAllCookies(new ValueCallback<Boolean>() {
+                @Override
+                public void onReceiveValue(Boolean aBoolean) {
+
+                }
+            });
+        } else cookieManager.removeAllCookie();
+    }
+
     private void loadWeb() {
         mWebView.getSettings().setJavaScriptEnabled(true);
+        mWebView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
         mWebView.loadUrl(TWApi.OAUTH_URL);
         mWebView.setWebViewClient(new WebViewClient() {
 

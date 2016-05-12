@@ -83,6 +83,7 @@ public class EntryRvAdapter extends RecyclerView.Adapter<EntryRvAdapter.EntryVie
             View mTodoView = inflater.inflate(R.layout.item_todo, holder.taskTodos, false);
             CheckBox todoComplete = (CheckBox) mTodoView.findViewById(R.id.item_todo_check);
             TextView todoName = (TextView) mTodoView.findViewById(R.id.item_todo_name);
+            todoComplete.setOnCheckedChangeListener(null);
             if (todoEntity.getChecked() == 1) {
                 todoComplete.setChecked(true);
             } else {
@@ -98,6 +99,7 @@ public class EntryRvAdapter extends RecyclerView.Adapter<EntryRvAdapter.EntryVie
             holder.taskTodos.addView(mTodoView);
         }
 
+        holder.taskComplete.setOnCheckedChangeListener(null);
         if (task.getCompleted() == 1) {
             holder.taskComplete.setChecked(true);
         } else {
@@ -139,7 +141,9 @@ public class EntryRvAdapter extends RecyclerView.Adapter<EntryRvAdapter.EntryVie
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (buttonView.getTag() instanceof TaskModel) {
             TaskModel task = (TaskModel) buttonView.getTag();
-            EventBus.getDefault().post(new TaskCompleteEvent(task.getTid(), task.getPid(), isChecked));
+            if (task != null) {
+                EventBus.getDefault().post(new TaskCompleteEvent(task.getTid(), task.getPid(), isChecked));
+            }
             LogUtils.i(TAG, ((TaskModel) buttonView.getTag()).getName() + " | " + isChecked);
         } else if (buttonView.getTag() instanceof TodoWrapper) {
             TodoWrapper todoWrapper = (TodoWrapper) buttonView.getTag();

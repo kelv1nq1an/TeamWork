@@ -66,6 +66,7 @@ public class TaskDetailActivity extends BaseActivity {
     private Realm mRealm;
     private RealmList<TodosEntity> mTodosEntities;
     private TaskDetailTodosAdapter mDetailTodosAdapter;
+    private TaskDetailTodosAdapter.TaskDetailListener mTaskDetailListener;
 
     private String mTaskId;
     private String mPid;
@@ -106,14 +107,14 @@ public class TaskDetailActivity extends BaseActivity {
             }
         });
 
-        TaskDetailTodosAdapter.TaskDetailListener taskDetailListener = new TaskDetailTodosAdapter.TaskDetailListener() {
+        mTaskDetailListener = new TaskDetailTodosAdapter.TaskDetailListener() {
             @Override
             public void onTodoTextChange(final String todoId, final String name) {
                 // TODO: 16/4/13 todoNameChange
                 putTodoData(todoId, mPid, name);
             }
         };
-        mDetailTodosAdapter.setTaskDetailListener(taskDetailListener);
+        mDetailTodosAdapter.setTaskDetailListener(mTaskDetailListener);
     }
 
     @Override
@@ -207,7 +208,9 @@ public class TaskDetailActivity extends BaseActivity {
                             mTask.getTodos().add(todosEntity);
                         }
                     });
+                    mDetailTodosAdapter.deleteTaskDetailListener();
                     mDetailTodosAdapter.setData(mTodosEntities);
+                    mDetailTodosAdapter.setTaskDetailListener(mTaskDetailListener);
                 }
                 mPdCommitChange.dismiss();
                 EventBus.getDefault().post(new TaskDataChangeEvent(true));
@@ -237,7 +240,9 @@ public class TaskDetailActivity extends BaseActivity {
                                 todosEntity.removeFromRealm();
                             }
                         });
+                        mDetailTodosAdapter.deleteTaskDetailListener();
                         mDetailTodosAdapter.setData(mTodosEntities);
+                        mDetailTodosAdapter.setTaskDetailListener(mTaskDetailListener);
                         EventBus.getDefault().post(new TaskDataChangeEvent(true));
                     }
                 }
@@ -337,7 +342,7 @@ public class TaskDetailActivity extends BaseActivity {
         mPid = getIntent().getStringExtra(EXTRA_PROJECT_ID);
         mTask = mRealm.where(TaskModel.class).equalTo("tid", mTaskId).findFirst();
         mTodosEntities = mTask.getTodos();
-        mDetailTodosAdapter = new TaskDetailTodosAdapter();
+        mDetailTodosAdapter = new TaskDetailTodosAdapter(mTask);
 
         mEtTaskDetailName.setText(mTask.getName());
         mEtTaskDetailDesc.setText(mTask.getDesc());

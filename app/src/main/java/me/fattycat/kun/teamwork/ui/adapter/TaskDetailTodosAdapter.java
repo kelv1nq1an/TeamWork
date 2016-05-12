@@ -24,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -38,10 +39,13 @@ import butterknife.ButterKnife;
 import me.fattycat.kun.teamwork.R;
 import me.fattycat.kun.teamwork.event.TaskDeleteEvent;
 import me.fattycat.kun.teamwork.event.TodoAddEvent;
+import me.fattycat.kun.teamwork.event.TodoCompleteEvent;
 import me.fattycat.kun.teamwork.event.TodoDeleteEvent;
+import me.fattycat.kun.teamwork.model.TaskModel;
+import me.fattycat.kun.teamwork.model.TodoWrapper;
 import me.fattycat.kun.teamwork.model.TodosEntity;
 
-public class TaskDetailTodosAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class TaskDetailTodosAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements CompoundButton.OnCheckedChangeListener {
     private static final String TAG = "TW_TaskDetailTodosAdapter";
     private static final int ITEM_TYPE_TODO_NORMAL = 0;
     private static final int ITEM_TYPE_TODO_ADD = 1;
@@ -50,6 +54,11 @@ public class TaskDetailTodosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private List<TodosEntity> mData = new ArrayList<>();
     private boolean mIsEditable = false;
     private TaskDetailListener mTaskDetailListener;
+    private TaskModel mTaskModel;
+
+    public TaskDetailTodosAdapter(TaskModel taskModel) {
+        this.mTaskModel = taskModel;
+    }
 
     public void setData(List<TodosEntity> data) {
         this.mData.clear();
@@ -61,6 +70,10 @@ public class TaskDetailTodosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     public void setTaskDetailListener(TaskDetailListener listener) {
         mTaskDetailListener = listener;
+    }
+
+    public void deleteTaskDetailListener() {
+        mTaskDetailListener = null;
     }
 
     public void setEditable(boolean editable) {
@@ -102,6 +115,11 @@ public class TaskDetailTodosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 taskDetailTodoViewHolder.mTodoDelete.setVisibility(View.GONE);
             }
             taskDetailTodoViewHolder.mTodoCheck.setEnabled(mIsEditable);
+            taskDetailTodoViewHolder.mTodoCheck.setOnCheckedChangeListener(this);
+
+            TodoWrapper todoWrapper = new TodoWrapper(todosEntity.getTodo_id(), mTaskModel.getTid(), mTaskModel.getPid(), todosEntity.getName());
+            taskDetailTodoViewHolder.mTodoCheck.setTag(todoWrapper);
+
             taskDetailTodoViewHolder.mTodoName.setText(todosEntity.getName());
             taskDetailTodoViewHolder.mTodoName.setEnabled(mIsEditable);
             taskDetailTodoViewHolder.mTodoName.addTextChangedListener(new TextWatcher() {
@@ -161,6 +179,12 @@ public class TaskDetailTodosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     @Override
     public int getItemCount() {
         return mData == null ? 2 : mData.size() + 2;
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        TodoWrapper todoWrapper = (TodoWrapper) buttonView.getTag();
+        EventBus.getDefault().post(new TodoCompleteEvent(todoWrapper, isChecked));
     }
 
     public class TaskDetailTodoViewHolder extends RecyclerView.ViewHolder {

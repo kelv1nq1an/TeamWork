@@ -69,6 +69,7 @@ import me.fattycat.kun.teamwork.TWSettings;
 import me.fattycat.kun.teamwork.event.LogoutEvent;
 import me.fattycat.kun.teamwork.event.TaskCompleteEvent;
 import me.fattycat.kun.teamwork.event.TaskDataChangeEvent;
+import me.fattycat.kun.teamwork.event.TaskDeleteEvent;
 import me.fattycat.kun.teamwork.event.TaskDetailEvent;
 import me.fattycat.kun.teamwork.event.TaskListEvent;
 import me.fattycat.kun.teamwork.event.TodoCompleteEvent;
@@ -209,6 +210,7 @@ public class MainActivity extends BaseActivity
         mFabButtonRefresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mProgressDialog.show();
                 getProjectEntries(TWSettings.sSelectedProjectPos);
                 mFabMenu.close(true);
             }

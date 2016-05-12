@@ -69,7 +69,12 @@ public class SettingActivity extends BaseActivity {
             public void onClick(View v) {
                 deleteAuthorization();
                 startActivity(new Intent(SettingActivity.this, LoginActivity.class));
-                mRealm.deleteAll();
+                mRealm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        mRealm.deleteAll();
+                    }
+                });
                 EventBus.getDefault().post(new LogoutEvent());
                 finish();
             }
